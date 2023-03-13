@@ -19,8 +19,24 @@ class PDFReading:
         self.reader: PyPDF2.PdfReader = PyPDF2.PdfReader(
             self.fileObject
             )
-
+        self.GetHeaderInfo()
         self.GetQuestions()
+
+    def GetHeaderInfo(self):
+        """
+        Get exam year, component
+        """
+        # get first page text
+        text = self.GetTextFromPage(0)
+        # get year
+        regex = re.compile(r" 20\d+ ")
+        self.year = re.search(regex, text).group(0).strip()
+        # get level
+        regex = re.compile(r" A level | AS level ")
+        self.level = re.search(regex, text).group(0).strip()
+        # get component
+        regex = re.compile(r" component [12] ")
+        self.component = re.search(regex, text).group(0).strip()
 
     def GetNumberOfPages(self):
         return len(self.reader.pages)

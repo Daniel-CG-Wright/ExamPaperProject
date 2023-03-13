@@ -3,7 +3,7 @@
 import PyPDF2
   
 # creating a pdf file object
-pdfFileObj = open('Component 2 Eduqas.pdf', 'rb')
+pdfFileObj = open('pdfs/Component 1.pdf', 'rb')
   
 # creating a pdf reader object
 pdfReader = PyPDF2.PdfReader(pdfFileObj)
@@ -12,7 +12,7 @@ pdfReader = PyPDF2.PdfReader(pdfFileObj)
 print(len(pdfReader.pages))
   
 # creating a page object
-pageObj = pdfReader.pages[4]
+pageObj = pdfReader.pages[0]
   
 # extracting text from page
 print(pageObj.extract_text())
