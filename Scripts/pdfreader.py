@@ -2,22 +2,24 @@
 # reads PDF files to a PDF reader object
 import PyPDF2
 from question import Question, Part
-from typing import List
+from typing import List, Dict
 import re
 
 
 class PDFReading:
-    def __init__(self, filename: str):
+    def __init__(self, questionpapername: str):
         """
         Create a PDF reader which uses PyPDF2 to parse
         a PDF of an exam paper.
+        Names should include .pdf
         Breaks the exam paper down into questions.
         Please close at the end of use.
         """
-        self.fileObject = open(filename, 'rb')
+        self.fileObject = open(questionpapername, 'rb')
         self.reader: PyPDF2.PdfReader = PyPDF2.PdfReader(
             self.fileObject
             )
+
         self.GetQuestions()
 
     def GetNumberOfPages(self):
@@ -43,9 +45,7 @@ class PDFReading:
         # r"\d+[.]\s[^[]*\[\d+\]|\(\w+\)\s[^[]*\[\d+\]"
         # this splits it up into question,
         questionsearch = re.compile(
-            r"""\d+[.]\s[^[]*\[\d+\]|
-            \s\(\w+\)\s[^[]*\[\d+\]|
-            ^\(\w+\)\s[^[]*\[\d+\]"""
+            r"\d+[.]\s[^[]*\[\d+\]|\s\(\w+\)\s[^[]*\[\d+\]"
         )
         text = ""
         for i in range(1, len(self.reader.pages)):
@@ -84,8 +84,9 @@ class PDFReading:
         """
         # get the question numbers and parts in the question 2. (a) (ii)
         self.questions: List[Question] = []
+        self.questionspartsindex: Dict[str, Question | Part] = {}
         questionpartsandnumber = re.compile(
-            r"^\d+[.]\s|\s\([^iv]\)\s|^\([^iv]\)\s|^\([iv]+\)\s|\s\([iv]+\)\s"
+            r"^\d+[.](?=\s)|(?<=\s)\([^iv]\)(?=\s)|^\([^iv]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)"
             )
         parts: List[str] = []
         for question in questions:
@@ -122,25 +123,30 @@ class PDFReading:
                 # intermediary parts
                 parts = questionpartsinquestion
                 questioncontents = question.partition(
-                    questionnumber)[-1].partition(questionpart)[0]
+                    questionnumber)[-1].partition(parts[1])[0]
                 partcontents = question.partition(questionpart)[-1].partition(
                     marks)[0]
                 # this separated the question into main part (2.),
                 # questioncontents (ohfef)
                 # part contents (wifhwp)
                 questionobj = Question(questioncontents, 0, intquestionnum)
+                self.questionspartsindex[questionnumber[:-1]] = questionobj
                 self.questions.append(questionobj)
-                for index, element in enumerate(parts[:-1]):
-                    partname = self.GetStringPart(parts[:index+1])
+                for index, element in enumerate(parts[1:]):
+                    partname = self.GetStringPart(parts[:index+2])
                     partobj = Part(questionobj, partname, 0, "")
                     questionobj.AddPart(partobj)
+                    self.questionspartsindex[partname] = partobj
 
                 questionpartobj = Part(
                     questionobj,
-                    questionpart[1:-1],
+                    self.GetStringPart(parts),
                     marksnum,
                     partcontents)
                 questionobj.AddPart(questionpartobj)
+
+                self.questionspartsindex[
+                    self.GetStringPart(parts)] = questionpartobj
 
             else:
                 # if the question is like 2. or ii or a
@@ -157,19 +163,22 @@ class PDFReading:
                 elif (
                     (
                         questionnumber[1:-1].isalpha() and
-                        "i" not in questionnumber and
-                        not parts[-1].isnumeric()
+                        not parts[-1][:-1].isnumeric()
                     )
                 ):
                     # change to something like 2a or 2b for main part
-                    parts.pop(-1)
-                    parts.append(questionnumber)
+                    if len(parts) >= 3 and all(i not in questionnumber for i in "iv"):
+                        parts = [parts[0], questionnumber]
+                    else:
+                        parts.pop(-1)
+                        parts.append(questionnumber)
                     questionnumber = questionnumber[1:-1]
                     fullnumber = self.GetStringPart(parts)
 
                 else:
+                    parts.append(questionnumber)
                     questionnumber = questionnumber[1:-1]
-                    fullnumber = self.GetStringPart(parts) + questionnumber
+                    fullnumber = self.GetStringPart(parts)
 
                 if questionnumber.isnumeric():
                     questionobj = Question(
@@ -177,9 +186,11 @@ class PDFReading:
                         marksnum,
                         int(questionnumber)
                         )
+                    self.questionspartsindex[questionnumber] = questionobj
                     self.questions.append(questionobj)
 
                 else:
                     # add parts
                     partobj = Part(questionobj, fullnumber, marksnum, contents)
+                    self.questionspartsindex[fullnumber] = partobj
                     questionobj.AddPart(partobj)
