@@ -1,5 +1,5 @@
 # question.py, question and parts class
-from typing import List
+from typing import List, Set
 
 
 class Question:
@@ -9,15 +9,20 @@ class Question:
             contents: str,
             marks: int,
             number: int = -1,
-            parts: List = []
+            parts: List = [],
+            topics: Set = set()
     ):
         self.marks = marks
         self.contents = contents
         self.number = number
         self.parts: List[Part] = parts
+        self.topics: Set[str] = topics
 
     def AddPart(self, part):
         self.parts.append(part)
+
+    def AddTopic(self, topic: str):
+        self.topics.add(topic)
 
 
 class Part:

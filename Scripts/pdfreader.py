@@ -2,10 +2,74 @@
 # reads PDF files to a PDF reader object
 import PyPDF2
 from question import Question, Part
-from typing import List, Dict
+from typing import List, Dict, Set
 import re
 
+# Stores a dictionary of each topic and its associated key words
+TOPICKEYWORDS: Dict[str, str] = {
+    "Databases": ["database", "Entity-Relationship Diagram", "ERD"],
+    "Operating Systems - buffering, interrupts, polling":
+    ["buffering", "polling", "interrupt",
+        "buffer", "time slicing", "partitioning", "scheduling"],
+    "Operating systems - Modes of operation":
+    ["Batch processing", "Real time transaction", "Real time control"],
+    "Operating systems - UI, types":
+    ["User Interface", "Command Line Interface", "multi-user",
+     "multi-processing", "standalone user", "multi-tasking",
+     "batch operating system"],
+    "Operating systems - resource management":
+    ["Utility software", "resource management"],
+    "Files":
+    ["direct access file", "hash file", "transaction file",
+     "master file", "serial file", "sequential file", "fixed length",
+     "variable length"],
+    "Networking":
+    ["collision", "Dijkstra",
+     "simplex", "duplex", "switch", "router", "network", "LAN", "WAN",
+     "internet", "multiplexing", "transmission"],
+    "Security":
+    ["Biometric", "Encryption", "Malware", "malicious software", "security",
+     "validation"],
+    "Algorithms":
+    ["algorithm", "passing by reference", "passing by value",
+     "Big O"],
+    "Systems":
+    ["Safety critical", "control system", "weather forecasting", "robotics"],
+    "Computer architecture":
+    ["assembly language", "von neumann", "cache", "control unit", "register"],
+    "SQL":
+    ["SQL"],
+    "Data representation":
+    ["stack", "queue", "linked list", "two-dimensional array",
+     "binary tree"],
+    "Binary":
+    ["floating point", "fixed point", "two's complement", "binary",
+     "masking"],
+    "Processing":
+    ["parallel processing", "distributed processing", "data mining"],
+    "Code of conduct and legislation and ethics":
+    ["code of conduct", "legislation", "ethic"],
+    "HCI":
+    ["HCI", "interface", "voice input"],
+    "Boolean algebra":
+    ["Boolean algebra", "De Morgan", "Truth table"],
+    "Compression":
+    ["compression"],
+    "Paradigms":
+    ["object", "class", "OOP", "procedural", "paradigm", "languages"],
+    "Translation":
+    ["Compiler", "interpreter", "assembler", "translation", "compilation"],
+    "Software for development":
+    ["version control", "IDE", "debugging"],
+    "Analysis and design":
+    ["waterfall", "agile", "analysis", "feasibility", "investigate",
+     "investigation"],
+    "Backus-Naur":
+    ["Backus-Naur", "BNF"],
+    "Testing and maintenance":
+    ["Alpha", "beta", "acceptance", "maintenance"]
 
+}
 class PDFReading:
     def __init__(self, questionpapername: str):
         """
@@ -128,6 +192,10 @@ class PDFReading:
             """
             marks = question[question.find("["):]
             marksnum = int(marks[1:-1])
+            # getting topics, it doesnt matter if the question is split
+            # into multiple parts as overall the topics are stored in the same
+            # question header
+            topics = self.GetTopics(question)
             if len(questionpartsinquestion) > 1:
                 # must be something like 2. ohfef (a) wifhwp
                 # first part
@@ -210,3 +278,8 @@ class PDFReading:
                     partobj = Part(questionobj, fullnumber, marksnum, contents)
                     self.questionspartsindex[fullnumber] = partobj
                     questionobj.AddPart(partobj)
+
+    def GetTopics(self, question: str) -> Set[str]:
+        """
+        Analyses key words of the question to determine topics
+        """
