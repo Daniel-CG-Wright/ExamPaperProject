@@ -21,8 +21,8 @@ class Question:
     def AddPart(self, part):
         self.parts.append(part)
 
-    def AddTopic(self, topic: str):
-        self.topics.add(topic)
+    def AddTopics(self, topics: Set[str]):
+        self.topics.update(topics)
 
 
 class Part:

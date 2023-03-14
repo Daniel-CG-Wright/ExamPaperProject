@@ -8,6 +8,8 @@ import re
 # Stores a dictionary of each topic and its associated key words
 TOPICKEYWORDS: Dict[str, str] = {
     "Databases": ["database", "Entity-Relationship Diagram", "ERD"],
+    "Contingencies":
+    ["contingency", "recovery", "backup"],
     "Operating Systems - buffering, interrupts, polling":
     ["buffering", "polling", "interrupt",
         "buffer", "time slicing", "partitioning", "scheduling"],
@@ -22,7 +24,7 @@ TOPICKEYWORDS: Dict[str, str] = {
     "Files":
     ["direct access file", "hash file", "transaction file",
      "master file", "serial file", "sequential file", "fixed length",
-     "variable length"],
+     "variable length", "hashing"],
     "Networking":
     ["collision", "Dijkstra",
      "simplex", "duplex", "switch", "router", "network", "LAN", "WAN",
@@ -39,12 +41,12 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["assembly language", "von neumann", "cache", "control unit", "register"],
     "SQL":
     ["SQL"],
-    "Data representation":
+    "Data structures":
     ["stack", "queue", "linked list", "two-dimensional array",
      "binary tree"],
     "Binary":
     ["floating point", "fixed point", "two's complement", "binary",
-     "masking"],
+     "masking", "truncation", "rounding"],
     "Processing":
     ["parallel processing", "distributed processing", "data mining"],
     "Code of conduct and legislation and ethics":
@@ -63,13 +65,15 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["version control", "IDE", "debugging"],
     "Analysis and design":
     ["waterfall", "agile", "analysis", "feasibility", "investigate",
-     "investigation"],
+     "investigation", "changeover"],
     "Backus-Naur":
     ["Backus-Naur", "BNF"],
     "Testing and maintenance":
     ["Alpha", "beta", "acceptance", "maintenance"]
 
 }
+
+
 class PDFReading:
     def __init__(self, questionpapername: str):
         """
@@ -96,10 +100,10 @@ class PDFReading:
         regex = re.compile(r" 20\d+ ")
         self.year = re.search(regex, text).group(0).strip()
         # get level
-        regex = re.compile(r" A level | AS level ")
+        regex = re.compile(r"A level|AS level")
         self.level = re.search(regex, text).group(0).strip()
         # get component
-        regex = re.compile(r" component [12] ")
+        regex = re.compile(r"component [12]")
         self.component = re.search(regex, text).group(0).strip()
 
     def GetNumberOfPages(self):
@@ -213,7 +217,7 @@ class PDFReading:
                 # this separated the question into main part (2.),
                 # questioncontents (ohfef)
                 # part contents (wifhwp)
-                questionobj = Question(questioncontents, 0, intquestionnum)
+                questionobj = Question(questioncontents, 0, intquestionnum, topics=topics)
                 self.questionspartsindex[questionnumber[:-1]] = questionobj
                 self.questions.append(questionobj)
                 for index, element in enumerate(parts[1:]):
@@ -251,7 +255,9 @@ class PDFReading:
                     )
                 ):
                     # change to something like 2a or 2b for main part
-                    if len(parts) >= 3 and all(i not in questionnumber for i in "iv"):
+                    if len(parts) >= 3 and all(
+                        i not in questionnumber for i in "iv"
+                    ):
                         parts = [parts[0], questionnumber]
                     else:
                         parts.pop(-1)
@@ -268,7 +274,8 @@ class PDFReading:
                     questionobj = Question(
                         contents,
                         marksnum,
-                        int(questionnumber)
+                        int(questionnumber),
+                        topics=topics
                         )
                     self.questionspartsindex[questionnumber] = questionobj
                     self.questions.append(questionobj)
@@ -278,8 +285,14 @@ class PDFReading:
                     partobj = Part(questionobj, fullnumber, marksnum, contents)
                     self.questionspartsindex[fullnumber] = partobj
                     questionobj.AddPart(partobj)
+                    questionobj.AddTopics(topics)
 
     def GetTopics(self, question: str) -> Set[str]:
         """
         Analyses key words of the question to determine topics
         """
+        keywords: Set[str] = set()
+        for keyword in TOPICKEYWORDS:
+            if any(i in question for i in TOPICKEYWORDS[keyword]):
+                keywords.add(keyword)
+        return keywords
