@@ -18,28 +18,6 @@ class SQLHandler:
         self.connection.timeout=5
         self.cursor = self.connection.cursor()
         self.connection.execute("SET NOCOUNT ON;")
-        self.createTables()
-        
-    def createTables(self):
-        """When the intiial connection to the database is made, a check will be made for each table that is needed - if the table is not existing or has no data,
-        we will add example records to each table after creating the table. This means that the program can be 'plugged' into a database and automatically format it to store the correct data,
-        without any manual SQL work."""
-        #INSERT TABLES CHECK HERE
-        # Table name: table creation script
-        TableQueries = {
-
-        }
-
-        for key in TableQueries:
-
-            self.addToDatabase(f"""IF NOT EXISTS(SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{key}') 
-            BEGIN 
-            {TableQueries[key]}
-            
-            END;""")
-
-        
-            
 
     def queryDatabase(self, query: str) -> tuple:
         """Internal command used to query the current database, and return the results of the query. If an error occurs, an error window is displayed.
@@ -71,7 +49,7 @@ class SQLHandler:
 
         try:
             try:
-
+                print(query)
                 self.connection.execute(query)
                 #Commits the executed query to ensure changes are made.
                 self.connection.commit()

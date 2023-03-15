@@ -99,11 +99,11 @@ class PDFReading:
         # get year
         regex = re.compile(r" 20\d+ ")
         self.year = re.search(regex, text).group(0).strip()
-        # get level
+        # get level (A | AS)
         regex = re.compile(r"A level|AS level")
-        self.level = re.search(regex, text).group(0).strip()
-        # get component
-        regex = re.compile(r"component [12]")
+        self.level = re.search(regex, text).group(0).strip().partition(" ")[0]
+        # get component 
+        regex = re.compile(r"component [12]|unit [1234]")
         self.component = re.search(regex, text).group(0).strip()
 
     def GetNumberOfPages(self):
@@ -167,7 +167,6 @@ class PDFReading:
         parts, contents and marks
         """
         # get the question numbers and parts in the question 2. (a) (ii)
-        self.questions: List[Question] = []
         self.questionspartsindex: Dict[str, Question | Part] = {}
         questionpartsandnumber = re.compile(
             r"^\d+[.](?=\s)|(?<=\s)\([^iv]\)(?=\s)|^\([^iv]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)"
@@ -212,16 +211,16 @@ class PDFReading:
                 # intermediary parts
                 parts = questionpartsinquestion
                 questioncontents = question.partition(
-                    questionnumber)[-1].partition(parts[1])[0]
-                partcontents = question.partition(questionpart)[-1].partition(
-                    marks)[0]
+                    questionnumber)[-1].partition(parts[1])[0].strip()
+                partcontents = question.partition(questionpart)[-1].rpartition(
+                    marks)[0].strip()
                 # this separated the question into main part (2.),
                 # questioncontents (ohfef)
                 # part contents (wifhwp)
                 questionobj = Question(questioncontents, 0, [], topics,
                                        intquestionnum)
                 self.questionspartsindex[currentQuestionNum] = questionobj
-                for index, element in enumerate(parts[1:]):
+                for index, element in enumerate(parts[1:-1]):
                     partname = self.GetStringPart(parts[:index+2])
                     partobj = Part(
                         self.questionspartsindex[currentQuestionNum],
