@@ -8,9 +8,9 @@ class Question:
             self,
             contents: str,
             marks: int,
-            number: int = -1,
-            parts: List = [],
-            topics: Set = set()
+            parts: List,
+            topics: Set,
+            number: int = -1
     ):
         self.marks = marks
         self.contents = contents

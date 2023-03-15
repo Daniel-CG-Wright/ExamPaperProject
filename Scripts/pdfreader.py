@@ -33,7 +33,7 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["Biometric", "Encryption", "Malware", "malicious software", "security",
      "validation"],
     "Algorithms":
-    ["algorithm", "passing by reference", "passing by value",
+    ["an algorithm", "passing by reference", "passing by value",
      "Big O"],
     "Systems":
     ["Safety critical", "control system", "weather forecasting", "robotics"],
@@ -173,6 +173,7 @@ class PDFReading:
             r"^\d+[.](?=\s)|(?<=\s)\([^iv]\)(?=\s)|^\([^iv]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)"
             )
         parts: List[str] = []
+        currentQuestionNum: int = 0
         for question in questions:
             # can be parts or full questions
             # first match for first question part
@@ -205,7 +206,7 @@ class PDFReading:
                 # first part
                 questionnumber = questionpartsinquestion[0]
                 # integer representation
-                intquestionnum = int(questionnumber[:-1])
+                intquestionnum = currentQuestionNum = int(questionnumber[:-1])
                 # final part
                 questionpart = questionpartsinquestion[-1]
                 # intermediary parts
@@ -217,24 +218,25 @@ class PDFReading:
                 # this separated the question into main part (2.),
                 # questioncontents (ohfef)
                 # part contents (wifhwp)
-                questionobj = Question(questioncontents, 0, intquestionnum, topics=topics)
-                self.questionspartsindex[questionnumber[:-1]] = questionobj
-                self.questions.append(questionobj)
+                questionobj = Question(questioncontents, 0, [], topics,
+                                       intquestionnum)
+                self.questionspartsindex[currentQuestionNum] = questionobj
                 for index, element in enumerate(parts[1:]):
                     partname = self.GetStringPart(parts[:index+2])
-                    partobj = Part(questionobj, partname, 0, "")
-                    questionobj.AddPart(partobj)
-                    self.questionspartsindex[partname] = partobj
+                    partobj = Part(
+                        self.questionspartsindex[currentQuestionNum],
+                        partname, 0, ""
+                        )
+                    self.questionspartsindex[currentQuestionNum].AddPart(
+                        partobj)
 
                 questionpartobj = Part(
-                    questionobj,
+                    self.questionspartsindex[currentQuestionNum],
                     self.GetStringPart(parts),
                     marksnum,
                     partcontents)
-                questionobj.AddPart(questionpartobj)
-
-                self.questionspartsindex[
-                    self.GetStringPart(parts)] = questionpartobj
+                self.questionspartsindex[currentQuestionNum].AddPart(
+                    questionpartobj)
 
             else:
                 # if the question is like 2. or ii or a
@@ -248,6 +250,7 @@ class PDFReading:
                     parts = [questionnumber]
                     questionnumber = questionnumber[:-1]
                     fullnumber = self.GetStringPart(parts)
+                    currentQuestionNum = int(fullnumber)
                 elif (
                     (
                         questionnumber[1:-1].isalpha() and
@@ -274,18 +277,21 @@ class PDFReading:
                     questionobj = Question(
                         contents,
                         marksnum,
-                        int(questionnumber),
-                        topics=topics
+                        [],
+                        topics,
+                        int(questionnumber)
                         )
-                    self.questionspartsindex[questionnumber] = questionobj
-                    self.questions.append(questionobj)
+                    self.questionspartsindex[currentQuestionNum] = questionobj
 
                 else:
                     # add parts
-                    partobj = Part(questionobj, fullnumber, marksnum, contents)
-                    self.questionspartsindex[fullnumber] = partobj
-                    questionobj.AddPart(partobj)
-                    questionobj.AddTopics(topics)
+                    partobj = Part(
+                        self.questionspartsindex[currentQuestionNum],
+                        fullnumber, marksnum, contents)
+                    self.questionspartsindex[
+                        currentQuestionNum].AddPart(partobj)
+                    self.questionspartsindex[
+                        currentQuestionNum].AddTopics(topics)
 
     def GetTopics(self, question: str) -> Set[str]:
         """
