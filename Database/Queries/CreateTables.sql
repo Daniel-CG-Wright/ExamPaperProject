@@ -1,18 +1,18 @@
-CREATE TABLE PAPER(PaperID varchar(25) PRIMARY KEY NOT NULL,
+CREATE TABLE PAPER(PaperID varchar(40) PRIMARY KEY NOT NULL,
 PaperComponent varchar(15),
 PaperYear varchar(4),
-PaperLevel varchar(2));
-CREATE TABLE QUESTION(QuestionID varchar(35) PRIMARY KEY NOT NULL,
-PaperID varchar(25),
+PaperLevel varchar(10));
+CREATE TABLE QUESTION(QuestionID varchar(50) PRIMARY KEY NOT NULL,
+PaperID varchar(40),
 QuestionNumber int,
 QuestionContents varchar(max));
 CREATE TABLE IMAGES(ImageID int PRIMARY KEY NOT NULL,
-QuestionID varchar(35),
+QuestionID varchar(50),
 ImageData varbinary(max));
-CREATE TABLE PARTS(PartID varchar(40) PRIMARY KEY NOT NULL,
-QuestionID varchar(35),
+CREATE TABLE PARTS(PartID varchar(60) PRIMARY KEY NOT NULL,
+QuestionID varchar(50),
 PartNumber varchar(10),
 PartContents varchar(max));
-CREATE TABLE QUESTIONTOPIC(QuestionTopicID varchar(65),
-QuestionID varchar(35),
+CREATE TABLE QUESTIONTOPIC(QuestionTopicID varchar(80),
+QuestionID varchar(50),
 TopicID varchar(30))

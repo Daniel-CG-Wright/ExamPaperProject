@@ -11,6 +11,7 @@ def main():
     sqlsocket = SQLHandler(SERVER, DATABASE)
     files = list((Path.cwd() / "pdfs").rglob('*.pdf'))
     for file in files:
+        print("processing " + str(file))
         reader = PDFReading(file)
         questions = reader.questionspartsindex
         # add the header information for the paper first
@@ -54,7 +55,7 @@ def main():
                 '{partid}',
                 '{questionid}',
                 '{part.section}',
-                '{part.contents}'
+                '{part.contents.strip()}'
                 )
                 """
                 sqlsocket.addToDatabase(partinsert)

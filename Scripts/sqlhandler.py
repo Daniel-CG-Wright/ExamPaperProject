@@ -49,12 +49,14 @@ class SQLHandler:
 
         try:
             try:
-                print(query)
+                #print(query)
                 self.connection.execute(query)
                 #Commits the executed query to ensure changes are made.
                 self.connection.commit()
                 return True, "placeholder_exception"
             except pyodbc.OperationalError as e:
+                print(e)
                 return False, e
         except Exception as e:
+            print(e)
             return False, e

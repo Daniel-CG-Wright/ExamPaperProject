@@ -100,9 +100,14 @@ class PDFReading:
         regex = re.compile(r" 20\d+ ")
         self.year = re.search(regex, text).group(0).strip()
         # get level (A | AS)
-        regex = re.compile(r"A level|AS level")
+        regex = re.compile(r"A level|AS|A2")
         self.level = re.search(regex, text).group(0).strip().partition(" ")[0]
-        # get component 
+        if self.level == "A2":
+            self.level = "A level"
+        elif self.level == "AS":
+            self.level = "AS level"
+
+        # get component
         regex = re.compile(r"component [12]|unit [1234]")
         self.component = re.search(regex, text).group(0).strip()
 
@@ -178,7 +183,7 @@ class PDFReading:
             # first match for first question part
             # then repeat for each remaining question part until no more
             # matching can be performed.
-            questionpartsinquestion = []
+            questionpartsinquestion: List[str] = []
             # tempquestion = question
             questionpartsinquestion = [i.strip() for i in re.findall(
                     questionpartsandnumber, question
@@ -204,38 +209,69 @@ class PDFReading:
                 # must be something like 2. ohfef (a) wifhwp
                 # first part
                 questionnumber = questionpartsinquestion[0]
-                # integer representation
-                intquestionnum = currentQuestionNum = int(questionnumber[:-1])
-                # final part
-                questionpart = questionpartsinquestion[-1]
-                # intermediary parts
-                parts = questionpartsinquestion
-                questioncontents = question.partition(
-                    questionnumber)[-1].partition(parts[1])[0].strip()
-                partcontents = question.partition(questionpart)[-1].rpartition(
-                    marks)[0].strip()
-                # this separated the question into main part (2.),
-                # questioncontents (ohfef)
-                # part contents (wifhwp)
-                questionobj = Question(questioncontents, 0, [], topics,
-                                       intquestionnum)
-                self.questionspartsindex[currentQuestionNum] = questionobj
-                for index, element in enumerate(parts[1:-1]):
-                    partname = self.GetStringPart(parts[:index+2])
-                    partobj = Part(
-                        self.questionspartsindex[currentQuestionNum],
-                        partname, 0, ""
-                        )
-                    self.questionspartsindex[currentQuestionNum].AddPart(
-                        partobj)
+                if questionpartsinquestion[0][:-1].isnumeric():
 
-                questionpartobj = Part(
-                    self.questionspartsindex[currentQuestionNum],
-                    self.GetStringPart(parts),
-                    marksnum,
-                    partcontents)
-                self.questionspartsindex[currentQuestionNum].AddPart(
-                    questionpartobj)
+                    # integer representation
+                    intquestionnum = currentQuestionNum = int(
+                        questionnumber[:-1])
+                    # final part
+                    questionpart = questionpartsinquestion[-1]
+                    # intermediary parts
+                    parts = questionpartsinquestion
+                    questioncontents = question.partition(
+                        questionnumber)[-1].partition(parts[1])[0].strip()
+                    partcontents = question.partition(
+                        questionpart)[-1].rpartition(
+                        marks)[0].strip()
+                    # this separated the question into main part (2.),
+                    # questioncontents (ohfef)
+                    # part contents (wifhwp)
+                    questionobj = Question(questioncontents, 0, [], topics,
+                                           intquestionnum)
+                    self.questionspartsindex[currentQuestionNum] = questionobj
+                    for index, element in enumerate(parts[1:-1]):
+                        partname = self.GetStringPart(parts[:index+2])
+                        partobj = Part(
+                            self.questionspartsindex[currentQuestionNum],
+                            partname, 0, ""
+                            )
+                        self.questionspartsindex[currentQuestionNum].AddPart(
+                            partobj)
+
+                    questionpartobj = Part(
+                        self.questionspartsindex[currentQuestionNum],
+                        self.GetStringPart(parts),
+                        marksnum,
+                        partcontents)
+                    self.questionspartsindex[currentQuestionNum].AddPart(
+                        questionpartobj)
+
+                else:
+                    # (b) (i) i.e. 2 parts
+                    initialcontents = question.partition(
+                        questionpartsinquestion[0]
+                    )[-1].partition(questionpartsinquestion[1])[0].strip()
+                    finalcontents = question.partition(
+                        questionpartsinquestion[1]
+                    )[-1].rpartition(marks)[0].strip()
+
+                    parts = [parts[0]] + questionpartsinquestion
+                    firstpart = Part(
+                        self.questionspartsindex[currentQuestionNum],
+                        self.GetStringPart(parts[:-1]),
+                        0,
+                        initialcontents
+                    )
+                    finalpart = Part(
+                        self.questionspartsindex[currentQuestionNum],
+                        self.GetStringPart(parts),
+                        marksnum,
+                        finalcontents
+                    )
+                    self.questionspartsindex[currentQuestionNum].AddPart(
+                        firstpart)
+                    self.questionspartsindex[currentQuestionNum].AddPart(
+                        finalpart)
 
             else:
                 # if the question is like 2. or ii or a
