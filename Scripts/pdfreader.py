@@ -73,6 +73,14 @@ TOPICKEYWORDS: Dict[str, str] = {
 
 }
 
+# if these appear, then skip
+# boolean algebra must be skipped as the characters do not correctly parse
+FORBIDDENKEYWORDS: List[str] = [
+    "Boolean Algebra",
+    "De Morgan's",
+    "Simplify the following boolean expression"
+]
+
 
 class PDFReading:
     def __init__(self, questionpapername: str):
@@ -103,9 +111,9 @@ class PDFReading:
         regex = re.compile(r"A level|AS|A2")
         self.level = re.search(regex, text).group(0).strip().partition(" ")[0]
         if self.level == "A2":
-            self.level = "A level"
+            self.level = "A"
         elif self.level == "AS":
-            self.level = "AS level"
+            self.level = "AS"
 
         # get component
         regex = re.compile(r"component [12]|unit [1234]")
@@ -134,7 +142,8 @@ class PDFReading:
         # r"\d+[.]\s[^[]*\[\d+\]|\(\w+\)\s[^[]*\[\d+\]"
         # this splits it up into question,
         questionsearch = re.compile(
-            r"\d+[.]\s[^[]*\[\d+\]|\s\(\w+\)\s[^[]*\[\d+\]"
+            r"\d+[.]\s.*? \[\d+\]|\s\(\w+\)\s.*? \[\d+\]",
+            re.DOTALL
         )
         text = ""
         for i in range(1, len(self.reader.pages)):
@@ -166,6 +175,62 @@ class PDFReading:
                 string += i
         return string
 
+    def romanToInt(self, s: str) -> int:
+        """
+        convert roman numeral to int
+        """
+        roman = {'i': 1, 'v': 5, 'iv': 4}
+        i = 0
+        num = 0
+        while i < len(s):
+            if i + 1 < len(s) and s[i:i+2] in roman:
+                num += roman[s[i:i+2]]
+                i += 2
+            else:
+                # print(i)
+                num += roman[s[i]]
+                i += 1
+        return num
+
+    def RemoveExtraQuestionParts(self,
+                                 questionparts: List[str],
+                                 partsAlreadyStored: List[str]) -> List[str]:
+        """
+        Returns questionparts, but with any bad parts
+        (ones identified during a question)
+        removed
+        """
+        # checks to ensure that there is only 1 of each question part counter
+        # allows us to block whern something like (i) in question (a)
+        # something happened
+        # bla bla
+        typescounters: Dict[str, bool] = {
+            r"\d+[.]": False,
+            r"\([^iv]\)": False,
+            r"\([iv]+\)": False
+            }
+
+        # logic:
+        # first we find any duplicates in questionparts and remove them
+        # then we must remove further duplicates in parts
+        for i in questionparts:
+            # removing excess in questionparts
+            # NOTE this removes the second instances
+            # (b) in part (a)(i) we did this (ii) do that
+            # this will get rid of (ii) which is the valid one
+
+            for key in typescounters:
+                if re.search(key, i):
+                    if typescounters[key]:
+                        questionparts.remove(i)
+                    else:
+                        typescounters[key] = True
+
+        # checking parts, if the remaining value is smaller than
+        # the last ones in parts we know it is a backref
+        # so can be removed
+        return questionparts
+
     def ParseQuestions(self, questions: List[str]):
         """
         Parses questions in the question list into their
@@ -174,15 +239,32 @@ class PDFReading:
         # get the question numbers and parts in the question 2. (a) (ii)
         self.questionspartsindex: Dict[str, Question | Part] = {}
         questionpartsandnumber = re.compile(
-            r"^\d+[.](?=\s)|(?<=\s)\([^iv]\)(?=\s)|^\([^iv]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)"
+            r"^\d+[.](?=\s)|(?<=\s)\([^iv]\)(?=\s)|^\([^iv]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)",
+            re.M
             )
+
         parts: List[str] = []
         currentQuestionNum: int = 0
+        skippingForbiddens = False
         for question in questions:
             # can be parts or full questions
             # first match for first question part
             # then repeat for each remaining question part until no more
             # matching can be performed.
+            if any(i.lower() in question.lower() for i in FORBIDDENKEYWORDS):
+                skippingForbiddens = True
+                print(question)
+                # do not allow, ignores things like Boolean Algebra
+                continue
+            elif skippingForbiddens:
+                print("unsktip")
+                # if a new question number appears then stop skipping
+                numbercomp = re.compile(r"^\d+[.](?=\s)", re.M)
+                if re.search(numbercomp, question):
+                    # stop
+                    skippingForbiddens = False
+                else:
+                    continue
             questionpartsinquestion: List[str] = []
             # tempquestion = question
             questionpartsinquestion = [i.strip() for i in re.findall(
@@ -199,7 +281,14 @@ class PDFReading:
                 else:
                     break
             """
-            marks = question[question.find("["):]
+            # check to remove any excess like (i) in part (a) we did:
+            questionpartsinquestion
+            markre = re.compile(
+                r" \[\d+\]"
+            )
+            marks = re.search(markre, question).group(0).strip()
+            # this doesnt work: marks = question[question.find("["):]
+            # as finding the first [ is illegal in algorithms
             marksnum = int(marks[1:-1])
             # getting topics, it doesnt matter if the question is split
             # into multiple parts as overall the topics are stored in the same
@@ -333,7 +422,8 @@ class PDFReading:
         Analyses key words of the question to determine topics
         """
         keywords: Set[str] = set()
+        lowerquestion = question.lower()
         for keyword in TOPICKEYWORDS:
-            if any(i in question for i in TOPICKEYWORDS[keyword]):
+            if any(i.lower() in lowerquestion for i in TOPICKEYWORDS[keyword]):
                 keywords.add(keyword)
         return keywords

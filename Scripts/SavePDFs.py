@@ -4,6 +4,7 @@ from sqlhandler import SQLHandler
 from pathlib import Path
 
 SERVER = "DESKTOP-QG36584\SQLEXPRESS"
+#SERVER = "DANIELS-DELL\SQLEXPRESS"
 DATABASE = "ExamQuestions"
 
 

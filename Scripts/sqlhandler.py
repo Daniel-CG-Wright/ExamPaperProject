@@ -18,7 +18,7 @@ class SQLHandler:
         self.connection.timeout=5
         self.cursor = self.connection.cursor()
         self.connection.execute("SET NOCOUNT ON;")
-
+        
     def queryDatabase(self, query: str) -> tuple:
         """Internal command used to query the current database, and return the results of the query. If an error occurs, an error window is displayed.
         Args:

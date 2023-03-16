@@ -13,6 +13,6 @@ CREATE TABLE PARTS(PartID varchar(60) PRIMARY KEY NOT NULL,
 QuestionID varchar(50),
 PartNumber varchar(10),
 PartContents varchar(max));
-CREATE TABLE QUESTIONTOPIC(QuestionTopicID varchar(80),
+CREATE TABLE QUESTIONTOPIC(QuestionTopicID varchar(150),
 QuestionID varchar(50),
-TopicID varchar(30))
+TopicID varchar(100))
