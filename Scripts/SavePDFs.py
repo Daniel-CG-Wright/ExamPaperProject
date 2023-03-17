@@ -2,6 +2,7 @@
 from pdfreader import PDFReading
 from sqlhandler import SQLHandler
 from pathlib import Path
+from sqlitehandler import SQLiteHandler
 
 #SERVER = "DESKTOP-QG36584\SQLEXPRESS"
 SERVER = "DANIELS-DELL\SQLEXPRESS"
@@ -9,7 +10,7 @@ DATABASE = "ExamQuestions"
 
 
 def main():
-    sqlsocket = SQLHandler(SERVER, DATABASE)
+    sqlsocket = SQLiteHandler()
     files = list((Path.cwd() / "pdfs").rglob('*.pdf'))
     for file in files:
         print("processing " + str(file))
