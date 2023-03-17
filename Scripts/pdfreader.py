@@ -282,7 +282,9 @@ class PDFReading:
                     break
             """
             # check to remove any excess like (i) in part (a) we did:
-            questionpartsinquestion
+            questionpartsinquestion = self.RemoveExtraQuestionParts(
+                questionpartsinquestion, parts
+                )
             markre = re.compile(
                 r" \[\d+\]"
             )
