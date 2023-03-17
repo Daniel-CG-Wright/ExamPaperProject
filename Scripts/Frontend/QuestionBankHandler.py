@@ -1,13 +1,21 @@
 from PyQt5.QtWidgets import QDialog
+from .Generated.QuestionBankGenerated import Ui_ViewAllQuestions
 # handles the generation of random questions
 
 
-class QuestionBankHandler(QDialog):
+class QuestionBankHandler(Ui_ViewAllQuestions, QDialog):
 
-    def __init__(self):
+    def __init__(self, parent=None):
         """
         For displaying the question bank
         """
+        super().__init__(parent)
+        self.setupUi(self)
+
+
+        self.show()
+        self.exec()
+
 
     def PopulateTable(self):
         """
