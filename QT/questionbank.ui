@@ -18,7 +18,7 @@
   <property name="windowTitle">
    <string>Question Bank</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,4,1,1">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,4,1,1">
    <item>
     <widget class="QLineEdit" name="lineEdit">
      <property name="sizePolicy">
@@ -44,7 +44,37 @@
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
-      <widget class="QComboBox" name="cbSelectTopic"/>
+      <widget class="QComboBox" name="cbSelectTopic">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cbComponent">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToContents</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cbLevel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -70,7 +100,21 @@
      <item>
       <widget class="QSpinBox" name="sbMax"/>
      </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxForSingleParts">
+       <property name="text">
+        <string>0 parts</string>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="lTip">
+     <property name="text">
+      <string>Click on a question to view all parts. 0 parts - return single part questions (good for long answer Qs)</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QTableWidget" name="twQuestionBank">
