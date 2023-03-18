@@ -19,6 +19,7 @@ class SQLiteHandler:
         """
         self.DropTables()
         self.CreateTables()
+        print("reset tables")
 
     def DropTables(self):
         """
@@ -53,7 +54,8 @@ class SQLiteHandler:
   QuestionID VARCHAR(50) PRIMARY KEY NOT NULL,
   PaperID VARCHAR(40),
   QuestionNumber INTEGER,
-  QuestionContents TEXT
+  QuestionContents TEXT,
+  TotalMarks INTEGER
 );
 
             """,
@@ -70,7 +72,8 @@ class SQLiteHandler:
   PartID VARCHAR(60) PRIMARY KEY NOT NULL,
   QuestionID VARCHAR(50),
   PartNumber VARCHAR(10),
-  PartContents TEXT
+  PartContents TEXT,
+  PartMarks INTEGER
 );
 
             """,
@@ -95,16 +98,10 @@ class SQLiteHandler:
             ((r1col1, r1col2), (r2col1, r2col2)...)
         """
 
-        try:
-            # Executes the query input
-            self.cursor.execute(query)
-            # returns the results
-            return self.cursor.fetchall()
-        except sqlite3.Error:
-            # The error is likely to be a network error (loss of connection),
-            # so we will return this here
-            # main.win.displayNetworkError()
-            return
+        # Executes the query input
+        self.cursor.execute(query)
+        # returns the results
+        return self.cursor.fetchall()
 
     def addToDatabase(self, query: str):
         """Commits changes using connection.commit(),
@@ -122,7 +119,7 @@ class SQLiteHandler:
         try:
             try:
                 # print(query)
-                self.connection.execute(query)
+                self.connection.executescript(query)
                 # Commits the executed query to ensure changes are made.
                 self.connection.commit()
                 return True, "placeholder_exception"

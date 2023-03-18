@@ -95,7 +95,11 @@ class PDFReading:
         self.reader: PyPDF2.PdfReader = PyPDF2.PdfReader(
             self.fileObject
             )
+        # gets level, component year, sets to
+        # self.year, self.level, self.component
         self.GetHeaderInfo()
+        # gets question data, saves to
+        # self.questionpartindex
         self.GetQuestions()
 
     def GetHeaderInfo(self):
@@ -118,6 +122,8 @@ class PDFReading:
         # get component
         regex = re.compile(r"component [12]|unit [1234]")
         self.component = re.search(regex, text).group(0).strip()
+        # DO NOT NORMALISE UNIT TO COMPONENT
+        # we want to keep unit and component separate
 
     def GetNumberOfPages(self):
         return len(self.reader.pages)
@@ -139,7 +145,6 @@ class PDFReading:
         # search for questions, ending each question with the marks
         # possible to generate something like 2. bla bla bla (a) more stuff [4]
         # this must be broken down into a question, and the part
-        # r"\d+[.]\s[^[]*\[\d+\]|\(\w+\)\s[^[]*\[\d+\]"
         # this splits it up into question,
         questionsearch = re.compile(
             r"\d+[.]\s.*? \[\d+\]|\s\(\w+\)\s.*? \[\d+\]",
@@ -178,6 +183,9 @@ class PDFReading:
     def romanToInt(self, s: str) -> int:
         """
         convert roman numeral to int
+        could be used in determining which of
+        parts (i), (ii), (iii) etc came first.
+        Not used currently.
         """
         roman = {'i': 1, 'v': 5, 'iv': 4}
         i = 0
@@ -236,7 +244,10 @@ class PDFReading:
         Parses questions in the question list into their
         parts, contents and marks
         """
-        # get the question numbers and parts in the question 2. (a) (ii)
+        # get the question numbers and parts in the question
+        # e.g. 2. (a) (ii) types
+        # the RE is not PEP8 compliant but I do not want to change it
+        # as I am scared to add newline characters and break everyhting
         self.questionspartsindex: Dict[str, Question | Part] = {}
         questionpartsandnumber = re.compile(
             r"^\d+[.](?=\s)|(?<=\s)\([^iv]\)(?=\s)|^\([^iv]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)",
@@ -252,52 +263,47 @@ class PDFReading:
             # then repeat for each remaining question part until no more
             # matching can be performed.
             if any(i.lower() in question.lower() for i in FORBIDDENKEYWORDS):
+                # skip all of the forbidden question
                 skippingForbiddens = True
-                print(question)
                 # do not allow, ignores things like Boolean Algebra
                 continue
             elif skippingForbiddens:
-                print("unsktip")
                 # if a new question number appears then stop skipping
                 numbercomp = re.compile(r"^\d+[.](?=\s)", re.M)
                 if re.search(numbercomp, question):
                     # stop
                     skippingForbiddens = False
                 else:
+                    # skip the rest of the forbidden
+                    # question's parts
                     continue
             questionpartsinquestion: List[str] = []
             # tempquestion = question
             questionpartsinquestion = [i.strip() for i in re.findall(
                     questionpartsandnumber, question
             )]
-            """while True:
-                partsinquestion = re.findall(
-                    questionpartsandnumber, tempquestion
-                    )
-                if len(partsinquestion) > 0:
-                    tempquestion = tempquestion.partition(
-                        partsinquestion[0])[-1]
-                    questionpartsinquestion.append(partsinquestion[0].strip())
-                else:
-                    break
-            """
-            # check to remove any excess like (i) in part (a) we did:
+
+            # check to remove any excess parts
+            # (e.g. if (i) and (ii) appear together)
             questionpartsinquestion = self.RemoveExtraQuestionParts(
                 questionpartsinquestion, parts
                 )
+            # regex to get the marks at the end.
             markre = re.compile(
                 r" \[\d+\]"
             )
+            # gets the marks
             marks = re.search(markre, question).group(0).strip()
             # this doesnt work: marks = question[question.find("["):]
             # as finding the first [ is illegal in algorithms
             marksnum = int(marks[1:-1])
+
             # getting topics, it doesnt matter if the question is split
             # into multiple parts as overall the topics are stored in the same
             # question header
             topics = self.GetTopics(question)
             if len(questionpartsinquestion) > 1:
-                # must be something like 2. ohfef (a) wifhwp
+                # must be something like 2. text (a) part text
                 # first part
                 questionnumber = questionpartsinquestion[0]
                 if questionpartsinquestion[0][:-1].isnumeric():
@@ -309,70 +315,106 @@ class PDFReading:
                     questionpart = questionpartsinquestion[-1]
                     # intermediary parts
                     parts = questionpartsinquestion
+                    # contents of main question
                     questioncontents = question.partition(
                         questionnumber)[-1].partition(parts[1])[0].strip()
+                    # contents of part at end (intermediary parts
+                    # will not have contents e.g.
+                    # 1. text here (b) (i) more text
+                    # only 1. and (i) have contents, intermediate
+                    # part (b) does not.)
                     partcontents = question.partition(
                         questionpart)[-1].rpartition(
                         marks)[0].strip()
+
                     # this separated the question into main part (2.),
                     # questioncontents (ohfef)
                     # part contents (wifhwp)
+
+                    # saving as a question object
                     questionobj = Question(questioncontents, 0, [], topics,
                                            intquestionnum)
+                    # adding question object to index of question objects
+                    # for this paper
                     self.questionspartsindex[currentQuestionNum] = questionobj
+
+                    # now we have to record intermediary parts without
+                    # content (excludes first and last parts)
                     for index, element in enumerate(parts[1:-1]):
+                        # get the partname by getting all the parts up
+                        # to this one.
                         partname = self.GetStringPart(parts[:index+2])
+                        # record part, with contents = ""
                         partobj = Part(
                             self.questionspartsindex[currentQuestionNum],
                             partname, 0, ""
                             )
+                        # add part to the list of parts in the current question
                         self.questionspartsindex[currentQuestionNum].AddPart(
                             partobj)
 
+                    # final part is also recorded.
                     questionpartobj = Part(
                         self.questionspartsindex[currentQuestionNum],
                         self.GetStringPart(parts),
                         marksnum,
                         partcontents)
+                    # add it to the current question
                     self.questionspartsindex[currentQuestionNum].AddPart(
                         questionpartobj)
 
                 else:
                     # (b) (i) i.e. 2 parts
+                    # contents of first part (can be blank)
                     initialcontents = question.partition(
                         questionpartsinquestion[0]
                     )[-1].partition(questionpartsinquestion[1])[0].strip()
+                    # contents of final part
                     finalcontents = question.partition(
                         questionpartsinquestion[1]
                     )[-1].rpartition(marks)[0].strip()
 
+                    # updates parts stack with new parts,
+                    # question num is not being modified
+                    # but it is guaranteed that the others are as the first
+                    # part
+                    # must be e.g. (b) and the second must be e.g. (ii)
                     parts = [parts[0]] + questionpartsinquestion
+
+                    # the first part is recorded. It is known to have 0 marks.
                     firstpart = Part(
                         self.questionspartsindex[currentQuestionNum],
                         self.GetStringPart(parts[:-1]),
                         0,
                         initialcontents
                     )
+
+                    # last part is trecorded.
                     finalpart = Part(
                         self.questionspartsindex[currentQuestionNum],
                         self.GetStringPart(parts),
                         marksnum,
                         finalcontents
                     )
+
+                    # adding both parts to the current question num
                     self.questionspartsindex[currentQuestionNum].AddPart(
                         firstpart)
                     self.questionspartsindex[currentQuestionNum].AddPart(
                         finalpart)
 
             else:
+                # external part - something like ii or a
+                # (not a question number base like 2.)
                 # if the question is like 2. or ii or a
                 questionnumber = questionpartsinquestion[0]
+                # get contents
                 contents = question.partition(questionnumber)[-1].rpartition(
                     marks)[0]
                 if (
                     questionnumber[:-1].isnumeric()
                 ):
-                    # change to new main question part
+                    # change to new main question part (question is numeric)
                     parts = [questionnumber]
                     questionnumber = questionnumber[:-1]
                     fullnumber = self.GetStringPart(parts)
@@ -387,18 +429,27 @@ class PDFReading:
                     if len(parts) >= 3 and all(
                         i not in questionnumber for i in "iv"
                     ):
+                        # update middle part, remove extended parts (ii)
                         parts = [parts[0], questionnumber]
                     else:
+                        # part is something like (ii) so remove extension
+                        # but keep previous parts the same
                         parts.pop(-1)
                         parts.append(questionnumber)
+
+                    # question number is retrieved from brackets
                     questionnumber = questionnumber[1:-1]
                     fullnumber = self.GetStringPart(parts)
 
                 else:
+                    # external part with no other external parts
+                    # recorded, so do not replace these external parts
+                    # instead just add them to the stack.
                     parts.append(questionnumber)
                     questionnumber = questionnumber[1:-1]
                     fullnumber = self.GetStringPart(parts)
 
+                # create question number
                 if questionnumber.isnumeric():
                     questionobj = Question(
                         contents,

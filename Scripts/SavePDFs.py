@@ -4,7 +4,7 @@ from sqlhandler import SQLHandler
 from pathlib import Path
 from sqlitehandler import SQLiteHandler
 
-#SERVER = "DESKTOP-QG36584\SQLEXPRESS"
+# SERVER = "DESKTOP-QG36584\SQLEXPRESS"
 SERVER = "DANIELS-DELL\SQLEXPRESS"
 DATABASE = "ExamQuestions"
 
@@ -29,13 +29,16 @@ def main():
             # create the SQL query
             questionobj = questions[question]
             questionid = paperid + str(questionobj.number)
+            totalmarks = questionobj.marks + sum(
+                i.marks for i in questionobj.parts)
             # first add the question itself
             questioninsert = f"""
             INSERT INTO QUESTION VALUES(
             '{questionid}',
             '{paperid}',
             {questionobj.number},
-            '{questionobj.contents}'
+            '{questionobj.contents}',
+            {totalmarks}
             )
             """
             sqlsocket.addToDatabase(questioninsert)
@@ -49,15 +52,17 @@ def main():
                 """
                 sqlsocket.addToDatabase(topicquery)
             for part in questionobj.parts:
-                if not part.contents:
+                if part.marks == 0:
                     continue
+
                 partid = questionid + part.section
                 partinsert = f"""
                 INSERT INTO PARTS VALUES(
                 '{partid}',
                 '{questionid}',
                 '{part.section}',
-                '{part.contents.strip()}'
+                '{part.contents.strip()}',
+                {part.marks}
                 )
                 """
                 sqlsocket.addToDatabase(partinsert)
