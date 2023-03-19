@@ -6,6 +6,44 @@ import re
 from typing import List
 
 
+def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str):
+    """
+    Like GetQuestionparts for a markschmee. Gets the markscheme for
+    all the parts of the question
+    """
+    output = ""
+    questionquery = f"""
+    SELECT
+    QuestionNumber
+    MarkschemeContents
+    FROM Question
+    WHERE MarkschemeContents IS NOT NULL
+    AND QuestionID = '{questionid}'
+    """
+    questionscheme = SQLSocket.queryDatabase(questionquery)
+    if len(questionscheme[0]) > 1:
+        questionscheme = f"{questionscheme[0][0]}. "
+        questionscheme += questionscheme[0][1].replace(r"\n", "\n")
+        questionscheme = questionscheme.replace("''", "'")
+        output += questionscheme + "\n"
+    partsquery = f"""
+    SELECT
+    PartNumber,
+    MarkschemeContents
+    FROM Parts
+    WHERE QuestionID = '{questionid}'
+    AND MarkschemeContents IS NOT NULL
+    """
+    partsschemes = SQLSocket.queryDatabase(partsquery)
+    for i in partsschemes:
+        if len(i) > 1:
+            contents = f"{i[0]}. "
+            contents += i[1].replace(r"\n", "\n").replace("''", "'")
+            output += contents
+    print(output)
+    return output
+
+
 def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str):
     """
     Gets the question and parts and formats them into
@@ -57,7 +95,6 @@ def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str):
         partnum = GetReversedStringRepresentation(part[0])
         questionstring += f"{partnum} {part[1]} [{part[2]}]\n"
 
-    print(questionstring)
     return questionstring
 
 

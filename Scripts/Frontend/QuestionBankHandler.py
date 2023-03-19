@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import QDialog, QTableWidgetItem
+from PyQt5.QtWidgets import QDialog, QTableWidgetItem, QTableWidget
 from .Generated.QuestionBankGenerated import Ui_ViewAllQuestions
 from sqlitehandler import SQLiteHandler
 from .Util.CriteriaClass import CriteriaStruct, TOPICKEYWORDS
 from typing import List, Tuple
 import re
-from .Util.QuestionPartFunctionHelpers import GetQuestionAndParts
+from .Util import QuestionPartFunctionHelpers as funchelpers
+from .OutputWindowHandler import OutputWindowHandler
 # handles the generation of random questions
 
 
@@ -31,6 +32,85 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QDialog):
         self.cbLevel.currentTextChanged.connect(self.OnLevelChange)
         self.sbMax.valueChanged.connect(self.PopulateTable)
         self.sbMin.valueChanged.connect(self.PopulateTable)
+        self.twQuestionBank.cellClicked.connect(self.OnQuestionSelected)
+        self.pbShowMarkscheme.clicked.connect(self.OnShowMarkscheme)
+        self.checkBoxForSingleParts.stateChanged.connect(self.PopulateTable)
+
+    def OnShowMarkscheme(self):
+        if len(self.twQuestionBank.selectedIndexes()) == 0:
+            return
+
+        selectedrowindex = self.twQuestionBank.currentRow()
+        questionid = self.records[selectedrowindex][0]
+        mstext = funchelpers.GetFullMarkscheme(self.SQLsocket, questionid)
+        labeltext = f"""
+        Question {
+            self.records[selectedrowindex][2]
+            } from paper {
+                self.records[selectedrowindex][1]
+                }"""
+
+        output = OutputWindowHandler(labeltext, mstext)
+
+    def OnQuestionSelected(self):
+        """
+        When a question is selected in the question bank we will call
+        this to perform the changes needed in the UI.
+        This involves adding the parts to the parts table,
+        and adding the text in the textedit.
+        """
+        selectedrowindex = self.twQuestionBank.currentRow()
+        questionid: str = self.records[selectedrowindex][0]
+        self.UpdatePartsTable(questionid)
+        questiontext = funchelpers.GetQuestionAndParts(
+            self.SQLsocket, questionid
+            )
+        self.teQuestionPreview.clear()
+        self.teQuestionPreview.setText(questiontext)
+
+    def OutputNoEntriesMessage(self, tablePointer: QTableWidget):
+        """"
+        Produces 'no entries' message in table. Hides table headers
+        (horizontal and vertical) so make sure to unhide.
+        """
+        try:
+            tablePointer.setRowCount(1)
+            tablePointer.setColumnCount(1)
+            tablePointer.setItem(0, 0, QTableWidgetItem("No entries found."))
+            tablePointer.horizontalHeader().setVisible(False)
+            tablePointer.verticalHeader().setVisible(False)
+        except Exception as e:
+            return
+
+    def UpdatePartsTable(self, questionid):
+        """
+        Updates the parts table with part information from the selected
+        question (or shows suitable no parts message)
+        """
+        partsquery = f"""
+        SELECT PartNumber, PartContents, PartMarks
+        FROM Parts
+        WHERE QuestionID = '{questionid}'
+        """
+        partsdata = self.SQLsocket.queryDatabase(partsquery)
+        self.twParts.clear()
+        if not partsdata:
+            self.OutputNoEntriesMessage(self.twParts)
+            return
+        # set table details
+        self.twParts.horizontalHeader().setVisible(True)
+        self.twParts.verticalHeader().setVisible(True)
+        self.twParts.setRowCount(len(partsdata))
+        headers = [
+            "Part Number",
+            "Part Contents",
+            "Part Marks"
+        ]
+        self.twParts.setColumnCount(len(headers))
+        self.twParts.setHorizontalHeaderLabels(headers)
+        for row, record in enumerate(partsdata):
+            for col, cell in enumerate(record):
+                self.twParts.setItem(row, col, QTableWidgetItem(str(cell)))
 
     def OnLevelChange(self):
         """
