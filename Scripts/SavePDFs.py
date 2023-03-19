@@ -1,5 +1,5 @@
 # save all PDFs in the PDFs folder to the database
-from pdfreader import PDFReading
+from ParsingOfData.pdfreader import PDFReading
 from sqlhandler import SQLHandler
 from pathlib import Path
 from sqlitehandler import SQLiteHandler
