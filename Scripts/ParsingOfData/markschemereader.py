@@ -23,7 +23,9 @@ class MarkschemeParser:
             self.fileObject
             )
         self.document = Document(filename + ".docx")
-        self.markschemetable = self.document.tables[0]
+        # markscheme is spread across several tables.
+        self.markschemetables = self.document.tables
+
         self.GetHeaderInfo()
         self.GetMarkschemes()
 
@@ -34,10 +36,10 @@ class MarkschemeParser:
         # get first page text
         text = self.GetTextFromPage(0)
         # get year
-        regex = re.compile(r" 20\d+ ")
-        self.year = re.search(regex, text).group(0).strip()
+        regex = re.compile(r" 20[\d]+[ ]*[\d] ", re.IGNORECASE)
+        self.year = re.search(regex, text).group(0).strip().replace(" ", "")
         # get level (A | AS)
-        regex = re.compile(r"A level|AS|A2")
+        regex = re.compile(r"A level|AS|A2", re.IGNORECASE)
         self.level = re.search(regex, text).group(0).strip().partition(" ")[0]
         if self.level == "A2":
             self.level = "A"
@@ -45,8 +47,8 @@ class MarkschemeParser:
             self.level = "AS"
 
         # get component
-        regex = re.compile(r"component [12]|unit [1234]")
-        self.component = re.search(regex, text).group(0).strip()
+        regex = re.compile(r"component [12]|unit [1234]", re.IGNORECASE)
+        self.component = re.search(regex, text).group(0).strip().lower()
         # DO NOT NORMALISE UNIT TO COMPONENT
         # we want to keep unit and component separate
 
@@ -68,47 +70,93 @@ class MarkschemeParser:
         self.answerindex
         """
         rowsofmarks: List[Tuple] = []
-        for row, rowcontents in enumerate(self.markschemetable.rows):
-            # only interested in first 2 cells
-            text = (cell.text for cell in rowcontents.cells[:2])
-            # skip first row (headers)
-            if row == 0:
-                continue
-            rowdata = tuple(text)
-            rowsofmarks.append(rowdata)
+        for table in self.markschemetables:
+            for row, rowcontents in enumerate(table.rows):
+                # only interested in first 2 cells (qnum and ms contents)
+                if row == 0:
+                    continue
+                if len(rowcontents.cells) > 1:
+                    text = (cell.text for cell in rowcontents.cells[:2])
+                    rowdata = tuple(text)
+                else:
+                    # long answer tbales only have 1 column
+                    rowdata = ("", rowcontents.cells[0].text)
+                rowsofmarks.append(rowdata)
         # rows of marks now contains each row and its marks
         # note that when a markscheme continues across a page there may be
-        # multiple entries for the same question, handle this later.
+        # multiple entries for the same question
+        self.ParseMarkschemes(rowsofmarks)
 
     def ParseMarkschemes(self, rows: List[Tuple]):
         """
         Parse the given rows from the table into self.answerindex
         """
-        self.answerindex: Dict[List]
-        questionStack: List[str] = ["-1."]
+        self.answerindex: Dict[str, Markscheme] = {}
+        questionStack: List[str] = ["-1"]
         # regex for question num and parts
-        # NEED TO ADD SUPPORT FOR THINGS LIKE 1bi
-        # maybe do them all separately.
-        sectionRe = re.compile(r"\d+[.]|\([^)]+\)")
+        numberRe = re.compile(r"\d+")
+        letterRe = re.compile(r"[^iv\d)(\s]+")
+        numeralRe = re.compile(r"[iv]+")
 
         for row in rows:
             # row[0] = section
             # row[1] = contents
-            # if a new question num has appeared
-            partsearch = re.findall(sectionRe, row[0])
-            if 
-        
+            # if a new question num has appeared we reassign to that
+            section = row[0]
+            questionNum = re.search(numberRe, section)
+            # if questionnum is provided and is different
+            # to the current question num, then we replace
+            if questionNum:
+                questionNum = questionNum.group(0)
+                if questionNum != questionStack[0]:
+                    questionStack = [questionNum]
+
+            # do the same for parts
+            mainpartNum = re.search(letterRe, section)
+            if mainpartNum:
+                mainpartNum = mainpartNum.group(0)
+                if len(questionStack) < 2 or questionStack[1] != mainpartNum:
+                    # change the main part
+                    questionStack = [questionStack[0], mainpartNum]
+
+            # same for numerals
+            numeralNum = re.search(numeralRe, section)
+            if numeralNum:
+                numeralNum = numeralNum.group(0)
+                # need to account for questions like 5i where
+                # there may not be a main part
+                if (
+                    len(questionStack) < 2 or
+                    (
+                        len(questionStack) < 3 and
+                        not re.search(numeralNum, questionStack[-1])
+                    )
+                ):
+                    questionStack.append(numeralNum)
+                elif (
+                    len(questionStack) > 1 and
+                    questionStack[-1] != numeralNum and
+                    re.search(numeralRe, questionStack[-1])
+                ):
+                    questionStack = questionStack[:-1] + [numeralNum]
+
+            # get section
+            sectionID = self.ConvertStackToQuestionNumber(questionStack)
+            # now we get markscheme object/contents.
+            # if there is already an entry under this question
+            # we just add to its contents
+            contents = row[1]
+            # .replace("\n", r"\n")
+            if sectionID in self.answerindex.keys():
+                self.answerindex[sectionID].contents += "\n" + contents
+            else:
+                markschemeobj = Markscheme(sectionID, contents)
+                self.answerindex[sectionID] = markschemeobj
+
     def ConvertStackToQuestionNumber(self, stack: List[str]):
         """
         Convert question stack to numbers e.g.
-        [5., (b), (i)] -> 5bi
+        [5, b, i] -> 5bi
         """
-        string = ""
-        for i in stack:
-            if i[-1] == ".":
-                string += i[:-1]
-            elif i[-1] == ")" and i[0] == "(":
-                string += i[1:-1]
-            else:
-                string += i
+        string = "".join(stack)
         return string

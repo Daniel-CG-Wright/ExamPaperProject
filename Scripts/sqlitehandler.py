@@ -55,7 +55,8 @@ class SQLiteHandler:
   PaperID VARCHAR(40),
   QuestionNumber INTEGER,
   QuestionContents TEXT,
-  TotalMarks INTEGER
+  TotalMarks INTEGER,
+  MarkschemeContents TEXT
 );
 
             """,
@@ -63,7 +64,8 @@ class SQLiteHandler:
             CREATE TABLE IMAGES(
   ImageID INTEGER PRIMARY KEY NOT NULL,
   QuestionID VARCHAR(50),
-  ImageData BLOB
+  ImageData BLOB,
+  IsPartOfMarkscheme INTEGER
 );
 
             """,
@@ -73,7 +75,8 @@ class SQLiteHandler:
   QuestionID VARCHAR(50),
   PartNumber VARCHAR(10),
   PartContents TEXT,
-  PartMarks INTEGER
+  PartMarks INTEGER,
+  MarkschemeContents TEXT
 );
 
             """,
@@ -83,7 +86,7 @@ class SQLiteHandler:
   QuestionID VARCHAR(50),
   TopicID VARCHAR(100)
 );
-            """
+            """,
         ]
         for query in queries:
             self.addToDatabase(query)
@@ -124,6 +127,7 @@ class SQLiteHandler:
                 self.connection.commit()
                 return True, "placeholder_exception"
             except sqlite3.Error as e:
+                print(query)
                 print(e)
                 return False, e
         except Exception as e:

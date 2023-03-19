@@ -8,7 +8,7 @@ def main():
     for file in files:
         print("processing " + str(file.name))
         doc = aw.Document(str(file))
-        doc.save("markschemes/" + file.name + ".docx")
+        doc.save("markschemes/" + file.name.rpartition(".pdf")[0] + ".docx")
 
 
 if __name__ == "__main__":
