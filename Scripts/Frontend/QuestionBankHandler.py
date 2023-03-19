@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QTableWidgetItem, QTableWidget
 from .Generated.QuestionBankGenerated import Ui_ViewAllQuestions
+from PyQt5.QtCore import Qt
 from sqlitehandler import SQLiteHandler
 from .Util.CriteriaClass import CriteriaStruct, TOPICKEYWORDS
 from typing import List, Tuple
@@ -17,6 +18,8 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QDialog):
         """
         super().__init__(parent)
         self.setupUi(self)
+        self.setModal(False)
+        self.setWindowModality(Qt.WindowModality.NonModal)
         self.SQLsocket = SQLiteHandler()
         self.records: List[Tuple] = []
         self.SetupInputWidgets()
@@ -50,7 +53,7 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QDialog):
                 self.records[selectedrowindex][1]
                 }"""
 
-        output = OutputWindowHandler(labeltext, mstext)
+        output = OutputWindowHandler(labeltext, mstext, self)
 
     def OnQuestionSelected(self):
         """

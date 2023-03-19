@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>555</width>
-    <height>593</height>
+    <height>746</height>
    </rect>
   </property>
   <property name="font">
@@ -51,14 +51,14 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pbConfirmReset">
+      <widget class="QPushButton" name="pbResetTopics">
        <property name="text">
         <string>Reset Topics</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pbResetTopics">
+      <widget class="QPushButton" name="pbConfirmReset">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -89,7 +89,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sbMax"/>
+      <widget class="QSpinBox" name="sbMax">
+       <property name="value">
+        <number>20</number>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QComboBox" name="cbLevel"/>
@@ -107,6 +111,36 @@
     </widget>
    </item>
    <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="lNumberOfQs">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="lNumberOfUniques">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="pbGenerate">
      <property name="text">
       <string>Generate Question</string>
@@ -114,7 +148,30 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="teRandomQuestion"/>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QTextEdit" name="teRandomQuestion">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QPushButton" name="pbViewMarkscheme">
