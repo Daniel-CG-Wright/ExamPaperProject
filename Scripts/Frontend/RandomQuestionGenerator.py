@@ -6,10 +6,12 @@ from sqlitehandler import SQLiteHandler
 from .Util.CriteriaClass import CriteriaStruct, TOPICKEYWORDS
 from typing import List, Set
 from .OutputWindowHandler import OutputWindowHandler
+from .ParentQuestionWindowClass import BaseQuestionClass
 # handles the generation of random questions
 
 
-class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog):
+class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog,
+                            BaseQuestionClass):
 
     def __init__(self, parent=None):
         """
@@ -257,9 +259,6 @@ WHERE
         self.cbComponent.clear()
         self.cbComponent.addItems(components)
 
-# NOTE when generating questions,
-# if no questions could be generated show an error message on the push button
-# and disable it
     def ShowMarkscheme(self):
         """
         Shows the markscheme for the current question ID
