@@ -36,7 +36,6 @@ class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog):
         self.pbGenerate.clicked.connect(self.GenerateQuestion)
         self.pbViewMarkscheme.clicked.connect(self.ShowMarkscheme)
         self.cbLevel.currentTextChanged.connect(self.OnLevelChange)
-        self.twTopics.cellDoubleClicked.connect(self.OnDeleteRowInTopics)
         self.pbResetTopics.clicked.connect(self.ActivateConfirmation)
         self.pbConfirmReset.clicked.connect(self.ResetTable)
         self.cbComponent.currentTextChanged.connect(self.GenerateQuestionPool)
@@ -210,40 +209,6 @@ WHERE
         self.pbConfirmReset.setEnabled(False)
         self.pbResetTopics.setText("Reset Topics")
 
-    def OnDeleteRowInTopics(self):
-        """
-        For when the row is double clicked
-        """
-        # if not X do nothing
-        if self.twTopics.currentItem().text() != "X":
-            return
-        row = self.twTopics.currentRow()
-        # get the value of the topic so it can be removed
-        # from our set as well
-        value = self.twTopics.item(row, 0).text()
-        self.selectedTopics.remove(value)
-        # refresh combobox with new data
-        self.currentCombobox.clear()
-        self.currentCombobox.addItem("No topic selected...")
-        # get avialable topics
-        availabletopics = set(TOPICKEYWORDS.keys()).difference(
-            self.selectedTopics)
-        availabletopics = list(availabletopics)
-        availabletopics.sort()
-        self.currentCombobox.addItems(availabletopics)
-
-        self.twTopics.removeRow(row)
-        print(row)
-        # create a new blank row if needed
-        if self.twTopics.rowCount() == 0:
-            self.AddRowToTopics()
-
-    def AddDeleteButton(self, row: int):
-        """
-        For adding the delete X
-        """
-        self.twTopics.setItem(row, 1, QTableWidgetItem("X"))
-
     def ComboboxChanged(self):
         """
         When the current combobox changes
@@ -258,8 +223,6 @@ WHERE
         self.twTopics.removeCellWidget(self.twTopics.rowCount()-1, 0)
         self.twTopics.setItem(
             self.twTopics.rowCount()-1, 0, QTableWidgetItem(str(value)))
-        # need to add new row
-        self.AddDeleteButton(self.twTopics.rowCount()-1)
         self.AddRowToTopics()
 
     def SetupInputWidgets(self):

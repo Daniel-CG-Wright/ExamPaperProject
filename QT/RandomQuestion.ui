@@ -38,11 +38,6 @@
      </attribute>
      <column>
       <property name="text">
-       <string>Remove</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
        <string>Topic</string>
       </property>
      </column>
