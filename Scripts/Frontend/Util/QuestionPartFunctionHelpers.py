@@ -1,9 +1,47 @@
+
 # this will get all the questions and parts and format them into text
 # 1. bla bla bla
 # (a) (i) do this
 from sqlitehandler import SQLiteHandler
 import re
 from typing import List
+
+
+def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str):
+    """
+    Like GetQuestionparts for a markschmee. Gets the markscheme for
+    all the parts of the question
+    """
+    output = ""
+    questionquery = f"""
+    SELECT
+    QuestionNumber
+    MarkschemeContents
+    FROM Question
+    WHERE MarkschemeContents IS NOT NULL
+    AND QuestionID = '{questionid}'
+    """
+    questionscheme = SQLSocket.queryDatabase(questionquery)
+    if len(questionscheme[0]) > 1:
+        questionscheme = f"{questionscheme[0][0]}. "
+        questionscheme += questionscheme[0][1].replace(r"\n", "\n")
+        questionscheme = questionscheme.replace("''", "'")
+        output += questionscheme + "\n"
+    partsquery = f"""
+    SELECT
+    PartNumber,
+    MarkschemeContents
+    FROM Parts
+    WHERE QuestionID = '{questionid}'
+    AND MarkschemeContents IS NOT NULL
+    """
+    partsschemes = SQLSocket.queryDatabase(partsquery)
+    for i in partsschemes:
+        if len(i) > 1:
+            contents = f"{i[0]}. "
+            contents += i[1].replace(r"\n", "\n").replace("''", "'")
+            output += contents
+    return output
 
 
 def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str):
@@ -57,7 +95,6 @@ def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str):
         partnum = GetReversedStringRepresentation(part[0])
         questionstring += f"{partnum} {part[1]} [{part[2]}]\n"
 
-    print(questionstring)
     return questionstring
 
 
@@ -104,3 +141,26 @@ def GetAllQuestionsAndParts(sqlsocket: SQLiteHandler) -> List[str]:
 # for testing
 if __name__ == "__main__":
     GetAllQuestionsAndParts(SQLiteHandler())
+
+
+
+def GetAllQuestionsAndParts(sqlsocket: SQLiteHandler) -> List[str]:
+    """
+    Gets all the questions and parts, and outputs them as a list of strings
+    """
+    questionsquery = f"""
+    SELECT QuestionID FROM Question
+    """
+    questions = [i[0] for i in sqlsocket.queryDatabase(questionsquery)]
+    outputlist = []
+    for question in questions:
+        outputlist.append(
+            GetQuestionAndParts(sqlsocket, question)
+        )
+    return outputlist
+
+
+# for testing
+if __name__ == "__main__":
+    GetAllQuestionsAndParts(SQLiteHandler())
+

@@ -39,3 +39,8 @@ class Part:
         self.contents = contents
         self.marks = marks
 
+
+class Markscheme:
+    def __init__(self, section: str, contents):
+        self.section = section
+        self.contents = contents
