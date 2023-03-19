@@ -4,6 +4,7 @@ from sqlitehandler import SQLiteHandler
 from .Util.CriteriaClass import CriteriaStruct, TOPICKEYWORDS
 from typing import List, Tuple
 import re
+from .Util.QuestionPartFunctionHelpers import GetQuestionAndParts
 # handles the generation of random questions
 
 
