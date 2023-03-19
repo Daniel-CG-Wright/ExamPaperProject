@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>829</width>
+    <width>555</width>
     <height>593</height>
    </rect>
   </property>
@@ -27,13 +27,46 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Remove</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Topic</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetDefaultConstraint</enum>
-     </property>
+     <item>
+      <widget class="QPushButton" name="pbConfirmReset">
+       <property name="text">
+        <string>Reset Topics</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pbResetTopics">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Confirm Reset</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -67,14 +100,28 @@
     </layout>
    </item>
    <item>
+    <widget class="QCheckBox" name="checkBox0Parts">
+     <property name="text">
+      <string>0 parts only - return single part questions (good for long answer Qs)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="pbGenerate">
      <property name="text">
-      <string>PushButton</string>
+      <string>Generate Question</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QTextEdit" name="teRandomQuestion"/>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pbViewMarkscheme">
+     <property name="text">
+      <string>Show Markscheme</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
