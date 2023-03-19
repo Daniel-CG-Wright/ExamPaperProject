@@ -141,26 +141,3 @@ def GetAllQuestionsAndParts(sqlsocket: SQLiteHandler) -> List[str]:
 # for testing
 if __name__ == "__main__":
     GetAllQuestionsAndParts(SQLiteHandler())
-
-
-
-def GetAllQuestionsAndParts(sqlsocket: SQLiteHandler) -> List[str]:
-    """
-    Gets all the questions and parts, and outputs them as a list of strings
-    """
-    questionsquery = f"""
-    SELECT QuestionID FROM Question
-    """
-    questions = [i[0] for i in sqlsocket.queryDatabase(questionsquery)]
-    outputlist = []
-    for question in questions:
-        outputlist.append(
-            GetQuestionAndParts(sqlsocket, question)
-        )
-    return outputlist
-
-
-# for testing
-if __name__ == "__main__":
-    GetAllQuestionsAndParts(SQLiteHandler())
-
