@@ -24,7 +24,8 @@ def GetAllMarkschemes(
     return markschemes
 
 
-def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str) -> str:
+def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str,
+                      overridenNumber: int = -1) -> str:
     """
     Like GetQuestionparts for a markschmee. Gets the markscheme for
     all the parts of the question
@@ -39,8 +40,11 @@ def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str) -> str:
     AND QuestionID = '{questionid}'
     """
     questionscheme = SQLSocket.queryDatabase(questionquery)
+    qnumber = questionscheme[0][0]
+    if overridenNumber != -1:
+        qnumber = overridenNumber
     if len(questionscheme[0]) > 1:
-        questionscheme = f"{questionscheme[0][0]}. "
+        questionscheme = f"{qnumber}. "
         questionscheme += questionscheme[0][1].replace(r"\n", "\n")
         questionscheme = questionscheme.replace("''", "'")
         output += questionscheme + "\n"
@@ -55,19 +59,26 @@ def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str) -> str:
     partsschemes = SQLSocket.queryDatabase(partsquery)
     for i in partsschemes:
         if len(i) > 1:
-            contents = f"{i[0]}. "
+            partnumber = i[0]
+            if overridenNumber != -1:
+                # override
+                partnumber = f"{overridenNumber}{partnumber[1:]}"
+            contents = f"{partnumber}. "
             contents += i[1].replace(r"\n", "\n").replace("''", "'")
             output += contents
     return output
 
 
-def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str):
+def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str,
+                        overridenNumber: int = -1):
     """
     Gets the question and parts and formats them into
     proper formatting:
     (2017 component 1 a level)
     1. bla bla bla
     (a) (i) do this [4]
+    If overriden number then replace question number
+    with the overriden number
     """
     partsquery = f"""
     SELECT
@@ -97,9 +108,12 @@ def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str):
     FROM Question WHERE QuestionID = '{questionid}')
     """
     paperdata = SQLSocket.queryDatabase(paperquery)
+    questionnumber = questiondata[0]
+    if overridenNumber != -1:
+        questionnumber = overridenNumber
     questionstring = f"""
     {paperdata[0][0]}
-    {questiondata[0]}. {questiondata[1]}
+    {questionnumber}. {questiondata[1]}
     """
     # if there are no parts then just add the total mark at the ned
     if not partsdata:

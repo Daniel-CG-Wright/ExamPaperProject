@@ -35,12 +35,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sbMax">
+      <widget class="QSpinBox" name="sbMin">
        <property name="minimum">
         <number>50</number>
        </property>
        <property name="maximum">
         <number>150</number>
+       </property>
+       <property name="value">
+        <number>90</number>
        </property>
       </widget>
      </item>
@@ -52,7 +55,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sbMin">
+      <widget class="QSpinBox" name="sbMax">
        <property name="minimum">
         <number>50</number>
        </property>
@@ -71,6 +74,13 @@
       <widget class="QComboBox" name="cbLevel"/>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pbGenerate">
+     <property name="text">
+      <string>Generate new paper!</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QTextEdit" name="teOutput"/>
