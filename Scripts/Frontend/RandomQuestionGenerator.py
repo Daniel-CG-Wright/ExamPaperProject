@@ -19,16 +19,6 @@ class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog):
         self.setupUi(self)
         self.setModal(False)
         self.setWindowModality(Qt.WindowModality.NonModal)
-        self.SetupBase(
-            self.twTopics,
-            self.pbResetTopics,
-            self.pbConfirmReset,
-            self.cbComponent,
-            self.cbLevel,
-            self.checkBox0Parts,
-            self.sbMin,
-            self.sbMax
-        )
         self.SQLSocket = SQLiteHandler()
         self.currentQuestionID: str = ""
         self.selectedTopics: Set = set()
