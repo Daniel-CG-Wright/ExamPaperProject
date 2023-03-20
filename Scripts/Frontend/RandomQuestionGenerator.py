@@ -21,6 +21,16 @@ class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog,
         self.setupUi(self)
         self.setModal(False)
         self.setWindowModality(Qt.WindowModality.NonModal)
+        self.SetupBase(
+            self.twTopics,
+            self.pbResetTopics,
+            self.pbConfirmReset,
+            self.cbComponent,
+            self.cbLevel,
+            self.checkBox0Parts,
+            self.sbMin,
+            self.sbMax
+        )
         self.SQLSocket = SQLiteHandler()
         self.currentQuestionID: str = ""
         self.selectedTopics: Set = set()
@@ -170,95 +180,6 @@ WHERE
             self.pbGenerate.setEnabled(True)
             self.pbGenerate.setText("Generate Question")
 
-    def ActivateConfirmation(self):
-        """
-        Make user confirm resetting the table
-        """
-        self.pbConfirmReset.setEnabled(
-            not self.pbConfirmReset.isEnabled()
-            )
-        if self.pbConfirmReset.isEnabled():
-            self.pbResetTopics.setText("Cancel confirmation")
-        else:
-            self.pbResetTopics.setText("Reset Topics")
-
-    def AddRowToTopics(self):
-        """
-        Add a new row with a topic combobox to topics table
-        """
-        availabletopics = set(TOPICKEYWORDS.keys())
-        availabletopics.discard(
-            self.selectedTopics
-        )
-        availabletopics = list(availabletopics)
-        availabletopics.sort()
-        # create the combobox
-        combobox = QComboBox()
-        combobox.addItem("No topic selected...")
-        combobox.addItems(availabletopics)
-        combobox.setEditable(False)
-        combobox.currentTextChanged.connect(self.ComboboxChanged)
-        self.currentCombobox = combobox
-        row = self.twTopics.rowCount()
-        # add to table
-        self.twTopics.insertRow(row)
-        self.twTopics.setCellWidget(row, 0, self.currentCombobox)
-
-    def ResetTable(self):
-        self.twTopics.setRowCount(0)
-        self.twTopics.clearContents()
-        self.AddRowToTopics()
-        self.pbConfirmReset.setEnabled(False)
-        self.pbResetTopics.setText("Reset Topics")
-
-    def ComboboxChanged(self):
-        """
-        When the current combobox changes
-        """
-        # skip if not actually selecting a proper topic
-        if self.currentCombobox.currentIndex() == 0:
-            return
-        # add to selected topics
-        self.selectedTopics.add(self.currentCombobox.currentText())
-        # replace with label now to prevent changing
-        value = self.currentCombobox.currentText()
-        self.twTopics.removeCellWidget(self.twTopics.rowCount()-1, 0)
-        self.twTopics.setItem(
-            self.twTopics.rowCount()-1, 0, QTableWidgetItem(str(value)))
-        self.AddRowToTopics()
-
-    def SetupInputWidgets(self):
-        """
-        Setup input widgets for use (levels)
-        """
-        levels = [
-            "Both",
-            "A",
-            "AS"
-        ]
-        self.cbLevel.addItems(levels)
-        self.twTopics.clear()
-        self.AddRowToTopics()
-        self.OnLevelChange()
-
-    def OnLevelChange(self):
-        """
-        If levels change we need to change the available components as well.
-        """
-        level = self.cbLevel.currentText()
-        components = []
-        if level == "A" or self.cbLevel.currentIndex() == 0:
-            components.extend([
-                "Both components",
-                "Component 1",
-                "Component 2"
-            ])
-        elif level == "AS":
-            components.append("Component 1")
-
-        self.cbComponent.clear()
-        self.cbComponent.addItems(components)
-
     def ShowMarkscheme(self):
         """
         Shows the markscheme for the current question ID
@@ -283,32 +204,3 @@ INNER JOIN
         data = self.SQLSocket.queryDatabase(dataquery)[0]
         labeltext = f"Question {data[1]} from paper {data[0]}"
         output = OutputWindowHandler(labeltext, mstext, self)
-
-    def GetQuestionCriteria(self) -> CriteriaStruct:
-        """
-        Get the question criteria and return as criteria object
-        """
-        # check component, level, topic to determine
-        # if they are on the first option
-        # (for all selection)
-        # if they are then we replace them with blanks
-        # so that we know not to include them as criteria
-        # in the SQL query
-        component = ""
-        if self.cbComponent.currentIndex() != 0:
-            component = self.cbComponent.currentText()
-        level = ""
-        if self.cbLevel.currentIndex() != 0:
-            level = self.cbLevel.currentText()
-        topics = set()
-        if len(self.selectedTopics) != 0:
-            topics = self.selectedTopics
-
-        return CriteriaStruct(
-            topics,
-            self.sbMin.value(),
-            self.sbMax.value(),
-            component,
-            level,
-            self.checkBox0Parts.isChecked()
-        )

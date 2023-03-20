@@ -9,16 +9,18 @@ from .Util.CriteriaClass import TOPICKEYWORDS, CriteriaStruct
 
 
 class BaseQuestionClass:
-    def __init__(self,
-                 topictable: QTableWidget,
-                 resetbutton: QPushButton,
-                 confirmresetbutton: QPushButton,
-                 componentCombobox: QComboBox,
-                 levelCombobox: QComboBox,
-                 nopartsbox: QCheckBox,
-                 minbox: QSpinBox,
-                 maxbox: QSpinBox):
-
+    def SetupBase(self,
+                  topictable: QTableWidget,
+                  resetbutton: QPushButton,
+                  confirmresetbutton: QPushButton,
+                  componentCombobox: QComboBox,
+                  levelCombobox: QComboBox,
+                  nopartsbox: QCheckBox,
+                  minbox: QSpinBox,
+                  maxbox: QSpinBox):
+        """
+        Allow use of base methods
+        """
         self.topictable = topictable
         self.resetbutton = resetbutton
         self.confirmresetbutton = confirmresetbutton
