@@ -6,12 +6,10 @@ from sqlitehandler import SQLiteHandler
 from .Util.CriteriaClass import CriteriaStruct, TOPICKEYWORDS
 from typing import List, Set
 from .OutputWindowHandler import OutputWindowHandler
-from .ParentQuestionWindowClass import BaseQuestionClass
 # handles the generation of random questions
 
 
-class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog,
-                            BaseQuestionClass):
+class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog):
 
     def __init__(self, parent=None):
         """
@@ -180,6 +178,98 @@ WHERE
             self.pbGenerate.setEnabled(True)
             self.pbGenerate.setText("Generate Question")
 
+    def ActivateConfirmation(self):
+        """
+        Make user confirm resetting the table
+        """
+        self.pbConfirmReset.setEnabled(
+            not self.pbConfirmReset.isEnabled()
+            )
+        if self.pbConfirmReset.isEnabled():
+            self.pbResetTopics.setText("Cancel confirmation")
+        else:
+            self.pbResetTopics.setText("Reset Topics")
+
+    def AddRowToTopics(self):
+        """
+        Add a new row with a topic combobox to topics table
+        """
+        availabletopics = set(TOPICKEYWORDS.keys())
+        availabletopics.discard(
+            self.selectedTopics
+        )
+        availabletopics = list(availabletopics)
+        availabletopics.sort()
+        # create the combobox
+        combobox = QComboBox()
+        combobox.addItem("No topic selected...")
+        combobox.addItems(availabletopics)
+        combobox.setEditable(False)
+        combobox.currentTextChanged.connect(self.ComboboxChanged)
+        self.currentCombobox = combobox
+        row = self.twTopics.rowCount()
+        # add to table
+        self.twTopics.insertRow(row)
+        self.twTopics.setCellWidget(row, 0, self.currentCombobox)
+
+    def ResetTable(self):
+        self.twTopics.setRowCount(0)
+        self.twTopics.clearContents()
+        self.AddRowToTopics()
+        self.pbConfirmReset.setEnabled(False)
+        self.pbResetTopics.setText("Reset Topics")
+
+    def ComboboxChanged(self):
+        """
+        When the current combobox changes
+        """
+        # skip if not actually selecting a proper topic
+        if self.currentCombobox.currentIndex() == 0:
+            return
+        # add to selected topics
+        self.selectedTopics.add(self.currentCombobox.currentText())
+        # replace with label now to prevent changing
+        value = self.currentCombobox.currentText()
+        self.twTopics.removeCellWidget(self.twTopics.rowCount()-1, 0)
+        self.twTopics.setItem(
+            self.twTopics.rowCount()-1, 0, QTableWidgetItem(str(value)))
+        self.AddRowToTopics()
+
+    def SetupInputWidgets(self):
+        """
+        Setup input widgets for use (levels)
+        """
+        levels = [
+            "Both",
+            "A",
+            "AS"
+        ]
+        self.cbLevel.addItems(levels)
+        self.twTopics.clear()
+        self.AddRowToTopics()
+        self.OnLevelChange()
+
+    def OnLevelChange(self):
+        """
+        If levels change we need to change the available components as well.
+        """
+        level = self.cbLevel.currentText()
+        components = []
+        if level == "A" or self.cbLevel.currentIndex() == 0:
+            components.extend([
+                "Both components",
+                "Component 1",
+                "Component 2"
+            ])
+        elif level == "AS":
+            components.append("Component 1")
+
+        self.cbComponent.clear()
+        self.cbComponent.addItems(components)
+
+# NOTE when generating questions,
+# if no questions could be generated show an error message on the push button
+# and disable it
     def ShowMarkscheme(self):
         """
         Shows the markscheme for the current question ID

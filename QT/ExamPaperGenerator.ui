@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>591</width>
+    <width>832</width>
     <height>574</height>
    </rect>
   </property>
@@ -41,24 +41,6 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QPushButton" name="pbResetTopics">
-       <property name="text">
-        <string>Reset Topics</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pbConfirmResetTopics">
-       <property name="text">
-        <string>Confirm Reset</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,1,0">
      <item>
       <widget class="QLabel" name="lMin">
@@ -68,17 +50,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sbMax">
-       <property name="minimum">
-        <number>10</number>
-       </property>
-       <property name="maximum">
-        <number>150</number>
-       </property>
-       <property name="value">
-        <number>90</number>
-       </property>
-      </widget>
+      <widget class="QSpinBox" name="sbMax"/>
      </item>
      <item>
       <widget class="QLabel" name="lMax">
@@ -88,17 +60,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="sbMin">
-       <property name="minimum">
-        <number>10</number>
-       </property>
-       <property name="maximum">
-        <number>200</number>
-       </property>
-       <property name="value">
-        <number>110</number>
-       </property>
-      </widget>
+      <widget class="QSpinBox" name="sbMin"/>
      </item>
      <item>
       <widget class="QComboBox" name="cbComponent"/>
@@ -109,13 +71,6 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="checkBox0Part">
-     <property name="text">
-      <string>0 part only - for getting questions with no parts (like long answer questions) only</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QTextEdit" name="teOutput"/>
    </item>
    <item>
@@ -123,7 +78,7 @@
      <item>
       <widget class="QPushButton" name="pbOutputTxt">
        <property name="text">
-        <string>Output To .txt</string>
+        <string>Output To Text</string>
        </property>
       </widget>
      </item>
