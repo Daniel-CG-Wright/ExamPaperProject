@@ -7,7 +7,24 @@ import re
 from typing import List
 
 
-def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str):
+def GetAllMarkschemes(
+        SQLSocket: SQLiteHandler
+        ) -> List[str]:
+    """
+    For getting all markschemes, designed for anki use.
+    """
+    questionids = SQLSocket.queryDatabase(
+        """
+        SELECT QuestionID FROM Question
+        """
+    )
+    markschemes = []
+    for questionid in questionids:
+        markschemes.append(GetFullMarkscheme(SQLSocket, questionid))
+    return markschemes
+
+
+def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str) -> str:
     """
     Like GetQuestionparts for a markschmee. Gets the markscheme for
     all the parts of the question
