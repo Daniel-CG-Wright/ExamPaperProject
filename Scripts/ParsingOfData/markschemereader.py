@@ -105,7 +105,6 @@ class MarkschemeParser:
         numberRe = re.compile(r"\d+")
         letterRe = re.compile(r"[abcdefgh]+")
         numeralRe = re.compile(r"[iv]+")
-
         for row in rows:
             # row[0] = section
             # row[1] = contents
@@ -152,20 +151,49 @@ class MarkschemeParser:
             # the contents rather than in the question number box
             # to fix this we also gotta analyse the contents.
             # if there is a part in there we can add it
-            
-
-            # get section
-            sectionID = self.ConvertStackToQuestionNumber(questionStack)
-            # now we get markscheme object/contents.
-            # if there is already an entry under this question
-            # we just add to its contents
             contents = row[1]
-            # .replace("\n", r"\n")
-            if sectionID in self.answerindex.keys():
-                self.answerindex[sectionID].contents += "\n" + contents
+            bracketnumeralRe = re.compile(r"\([iv]+\)", re.IGNORECASE)
+            numerals = list(re.finditer(bracketnumeralRe, contents))
+            if numerals:
+                # there are numerals in there so get the contents
+                # for each group we have the start and end index
+                # so we just grab the question from the end of the previous
+                # numeral
+                # to the start of the next
+                for i in range(len(numerals)):
+                    # get the contents up to the next numeral
+                    startindex = numerals[i].end(0)+1
+                    if i == len(numerals)-1:
+                        endindex = -1
+                    else:
+                        endindex = numerals[i+1].start(0)
+                    # get the numerals themselves (e.g. ii)
+                    numeralstring = numerals[i].group(0)[1:-1]
+                    sectionID = self.ConvertStackToQuestionNumber(
+                        questionStack + [numeralstring])
+                    if i == len(numerals)-1:
+                        numeralcontents = contents[startindex:]
+                    else:
+                        numeralcontents = contents[startindex:endindex]
+                    # write contents
+                    if sectionID in self.answerindex.keys():
+                        self.answerindex[
+                            sectionID].contents += "\n" + numeralcontents
+                    else:
+                        markschemeobj = Markscheme(sectionID, numeralcontents)
+                        self.answerindex[sectionID] = markschemeobj
             else:
-                markschemeobj = Markscheme(sectionID, contents)
-                self.answerindex[sectionID] = markschemeobj
+                # get section
+                sectionID = self.ConvertStackToQuestionNumber(questionStack)
+                # now we get markscheme object/contents.
+                # if there is already an entry under this question
+                # we just add to its contents
+                # .replace("\n", r"\n")
+                if sectionID in self.answerindex.keys():
+                    self.answerindex[sectionID].contents += "\n" + contents
+                else:
+                    markschemeobj = Markscheme(sectionID, contents)
+                    self.answerindex[sectionID] = markschemeobj
 
     def ConvertStackToQuestionNumber(self, stack: List[str]):
         """
