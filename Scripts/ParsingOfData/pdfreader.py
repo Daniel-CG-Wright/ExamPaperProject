@@ -2,76 +2,9 @@
 # reads PDF files to a PDF reader object
 import PyPDF2
 from question import Question, Part
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Tuple
 import re
-
-# Stores a dictionary of each topic and its associated key words
-TOPICKEYWORDS: Dict[str, str] = {
-    "Databases": ["database", "Entity-Relationship Diagram", "ERD"],
-    "Contingencies":
-    ["contingency", "recovery", "backup"],
-    "Operating Systems - buffering, interrupts, polling":
-    ["buffering", "polling", "interrupt",
-        "buffer", "time slicing", "partitioning", "scheduling"],
-    "Operating systems - Modes of operation":
-    ["Batch processing", "Real time transaction", "Real time control"],
-    "Operating systems - UI, types":
-    ["User Interface", "Command Line Interface", "multi-user",
-     "multi-processing", "standalone user", "multi-tasking",
-     "batch operating system"],
-    "Operating systems - resource management":
-    ["Utility software", "resource management"],
-    "Files":
-    ["direct access file", "hash file", "transaction file",
-     "master file", "serial file", "sequential file", "fixed length",
-     "variable length", "hashing"],
-    "Networking":
-    ["collision", "Dijkstra",
-     "simplex", "duplex", "switch", "router", "network", "LAN", "WAN",
-     "internet", "multiplexing", "transmission"],
-    "Security":
-    ["Biometric", "Encryption", "Malware", "malicious software", "security",
-     "validation"],
-    "Algorithms":
-    ["an algorithm", "passing by reference", "passing by value",
-     "Big O"],
-    "Systems":
-    ["Safety critical", "control system", "weather forecasting", "robotics"],
-    "Computer architecture":
-    ["assembly language", "von neumann", "cache", "control unit", "register"],
-    "SQL":
-    ["SQL"],
-    "Data structures":
-    ["stack", "queue", "linked list", "two-dimensional array",
-     "binary tree"],
-    "Binary":
-    ["floating point", "fixed point", "two's complement", "binary",
-     "masking", "truncation", "rounding"],
-    "Processing":
-    ["parallel processing", "distributed processing", "data mining"],
-    "Code of conduct and legislation and ethics":
-    ["code of conduct", "legislation", "ethic"],
-    "HCI":
-    ["HCI", "interface", "voice input"],
-    "Boolean algebra":
-    ["Boolean algebra", "De Morgan", "Truth table"],
-    "Compression":
-    ["compression"],
-    "Paradigms":
-    ["object", "class", "OOP", "procedural", "paradigm", "languages"],
-    "Translation":
-    ["Compiler", "interpreter", "assembler", "translation", "compilation"],
-    "Software for development":
-    ["version control", "IDE", "debugging"],
-    "Analysis and design":
-    ["waterfall", "agile", "analysis", "feasibility", "investigate",
-     "investigation", "changeover"],
-    "Backus-Naur":
-    ["Backus-Naur", "BNF"],
-    "Testing and maintenance":
-    ["Alpha", "beta", "acceptance", "maintenance"]
-
-}
+from Frontend.Util.CriteriaClass import TOPICKEYWORDS
 
 # if these appear, then skip
 # boolean algebra must be skipped as the characters do not correctly parse
@@ -79,6 +12,23 @@ FORBIDDENKEYWORDS: List[str] = [
     "Boolean Algebra",
     "De Morgan's",
     "Simplify the following boolean expression"
+]
+
+
+class ExceptQuestion:
+    def __init__(self, year, component, level, questionnum):
+        """
+        Used to except a specific question.
+        """
+        self.year = year
+        self.component = component
+        self.level = level
+        self.questionnum = questionnum
+
+
+# some questions may not be parsable. Except them here.
+# E.g. if there is an erroneous 2b, then except it here.
+MANUALEXCEPTIONS: List[ExceptQuestion] = [
 ]
 
 
@@ -147,7 +97,7 @@ class PDFReading:
         # this must be broken down into a question, and the part
         # this splits it up into question,
         questionsearch = re.compile(
-            r"\d+[.]\s.*? \[\d+\]|\s\(\w+\)\s.*? \[\d+\]",
+            r"\d+[.]\s.*? \[\d+\]|\s\([a-zA-Z]+\)\s.*? \[\d+\]",
             re.DOTALL
         )
         text = ""
@@ -157,6 +107,9 @@ class PDFReading:
 
         # here we use regex
         # to match questions of pattern x. <contents> [mark]
+        # remove copyright wjec bla bla first
+        text = re.sub(r"©.+?Ltd.", "", text)
+        text = re.sub(r"\(\w500.+?\)", "", text)
         questions = re.findall(questionsearch, text)
         self.ParseQuestions(questions)
 
@@ -214,26 +167,37 @@ class PDFReading:
         # bla bla
         typescounters: Dict[str, bool] = {
             r"\d+[.]": False,
-            r"\([^iv]\)": False,
+            r"\([abcdefgh]\)": False,
             r"\([iv]+\)": False
             }
 
         # logic:
         # first we find any duplicates in questionparts and remove them
         # then we must remove further duplicates in parts
-        for i in questionparts:
+        for index, element in enumerate(questionparts):
             # removing excess in questionparts
             # NOTE this removes the second instances
             # (b) in part (a)(i) we did this (ii) do that
             # this will get rid of (ii) which is the valid one
+            # if there is a number before letters remove
+            # all the letters up to the number
+            if (
+                re.search(r"\d+[.]", element) and
+                not typescounters[r"\d+[.]"] and
+                (typescounters[r"\([iv]+\)"] or
+                    typescounters[r"\([abcdefgh]\)"]
+                 )
+            ):
+                questionparts = questionparts[index:]
+                for key in typescounters:
+                    typescounters[key] = False
 
             for key in typescounters:
-                if re.search(key, i):
+                if re.search(key, element):
                     if typescounters[key]:
-                        questionparts.remove(i)
+                        questionparts.remove(element)
                     else:
                         typescounters[key] = True
-
         # checking parts, if the remaining value is smaller than
         # the last ones in parts we know it is a backref
         # so can be removed
@@ -250,7 +214,7 @@ class PDFReading:
         # as I am scared to add newline characters and break everyhting
         self.questionspartsindex: Dict[str, Question | Part] = {}
         questionpartsandnumber = re.compile(
-            r"^\d+[.](?=\s)|(?<=\s)\([^iv]\)(?=\s)|^\([^iv]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)",
+            r"^\d+[.](?=\s)|(?<=\s)\([abcdefgh]\)(?=\s)|^\([abcdefgh]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)",
             re.M
             )
 
@@ -330,7 +294,9 @@ class PDFReading:
                     # this separated the question into main part (2.),
                     # questioncontents (ohfef)
                     # part contents (wifhwp)
-
+                    if self.IsQuestionExcepted(
+                            self.GetStringPart(parts)):
+                        continue
                     # saving as a question object
                     questionobj = Question(questioncontents, 0, [], topics,
                                            intquestionnum)
@@ -450,6 +416,8 @@ class PDFReading:
                     fullnumber = self.GetStringPart(parts)
 
                 # create question number
+                if self.IsQuestionExcepted(fullnumber):
+                    continue
                 if questionnumber.isnumeric():
                     questionobj = Question(
                         contents,
@@ -470,6 +438,17 @@ class PDFReading:
                     self.questionspartsindex[
                         currentQuestionNum].AddTopics(topics)
 
+    def IsQuestionExcepted(self, partsstring: str) -> bool:
+        """
+        Is question (partstring like 2b) in exceptions
+        If yes then returns true
+        """
+        for exception in MANUALEXCEPTIONS:
+            if exception.questionnum == partsstring:
+                return True
+
+        return False
+
     def GetTopics(self, question: str) -> Set[str]:
         """
         Analyses key words of the question to determine topics
@@ -477,6 +456,22 @@ class PDFReading:
         keywords: Set[str] = set()
         lowerquestion = question.lower()
         for keyword in TOPICKEYWORDS:
-            if any(i.lower() in lowerquestion for i in TOPICKEYWORDS[keyword]):
+            # need to make sure it is a full match (match whole
+            # word only)
+            doesBelong = False
+            for i in TOPICKEYWORDS[keyword]:
+                block = False
+                if i[0] == "!":
+                    block = True
+                    i = i[1:]
+                search = re.search(r"\b" + i.lower() + r"\b", lowerquestion)
+                if search and not block:
+                    # mark it
+                    doesBelong = True
+                    break
+                elif block:
+                    doesBelong = False
+                    break
+            if doesBelong:
                 keywords.add(keyword)
         return keywords

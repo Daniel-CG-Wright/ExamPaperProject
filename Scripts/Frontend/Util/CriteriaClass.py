@@ -1,6 +1,9 @@
 # used to specify common exam question criteria.
 from typing import Dict
-# we use this for the keywords in the keys
+# Stores a dictionary of each topic and its associated key words
+# put a ! in front of it to avoid classing it for this string
+# e.g. if matching !stock control system then if the only keyword
+# is "stock control system" then it will not be matched
 TOPICKEYWORDS: Dict[str, str] = {
     "Databases": ["database", "Entity-Relationship Diagram", "ERD"],
     "Contingencies":
@@ -28,12 +31,16 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["Biometric", "Encryption", "Malware", "malicious software", "security",
      "validation"],
     "Algorithms":
-    ["an algorithm", "passing by reference", "passing by value",
-     "Big O"],
+    ["an algorithm", "passing by reference", "passing by value"],
+    "Big O":
+    ["Big O", "Time complexity"],
     "Systems":
-    ["Safety critical", "control system", "weather forecasting", "robotics"],
+    ["Safety critical", "control system", "weather forecasting",
+     "robotics", "CAD", "Computer Aided Design", "!stock control system"],
     "Computer architecture":
-    ["assembly language", "von neumann", "cache", "control unit", "register"],
+    ["von neumann", "cache", "control unit"],
+    "Assembly language":
+    ["Assembly language"],
     "SQL":
     ["SQL"],
     "Data structures":
@@ -63,8 +70,10 @@ TOPICKEYWORDS: Dict[str, str] = {
      "investigation", "changeover"],
     "Backus-Naur":
     ["Backus-Naur", "BNF"],
-    "Testing and maintenance":
-    ["Alpha", "beta", "acceptance", "maintenance"]
+    "Testing":
+    ["Alpha", "beta", "acceptance testing"],
+    "Maintenance documentation":
+    ["Maintenance documentation"]
 
 }
 

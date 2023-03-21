@@ -74,7 +74,15 @@ class MarkschemeParser:
             for row, rowcontents in enumerate(table.rows):
                 # only interested in first 2 cells (qnum and ms contents)
                 if row == 0:
-                    continue
+                    # there is a problem where this sometimes skips
+                    # rows that actually require reading
+                    # so we must check to make sure we are not skipping
+                    # anything important.
+                    # AO will always be in the 4th cell for the rows
+                    # we need to skip
+                    if (len(rowcontents.cells) > 2 and
+                            "AO" in rowcontents.cells[3].text.upper()):
+                        continue
                 if len(rowcontents.cells) > 1:
                     text = (cell.text for cell in rowcontents.cells[:2])
                     rowdata = tuple(text)
@@ -95,7 +103,7 @@ class MarkschemeParser:
         questionStack: List[str] = ["-1"]
         # regex for question num and parts
         numberRe = re.compile(r"\d+")
-        letterRe = re.compile(r"[^iv\d)(\s]+")
+        letterRe = re.compile(r"[abcdefgh]+")
         numeralRe = re.compile(r"[iv]+")
 
         for row in rows:
@@ -139,6 +147,12 @@ class MarkschemeParser:
                     re.search(numeralRe, questionStack[-1])
                 ):
                     questionStack = questionStack[:-1] + [numeralNum]
+
+            # For some markschemes (like 2018 unit 4) there can be (i) inside
+            # the contents rather than in the question number box
+            # to fix this we also gotta analyse the contents.
+            # if there is a part in there we can add it
+            
 
             # get section
             sectionID = self.ConvertStackToQuestionNumber(questionStack)
