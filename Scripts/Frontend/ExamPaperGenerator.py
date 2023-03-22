@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from .Generated.ExamPaperGenerated import Ui_PaperGenerator
-from .Util.QuestionPartFunctionHelpers import GetQuestionAndParts
+from .Util.QuestionPartFunctionHelpers import (GetQuestionAndParts,
+                                               GetFullMarkscheme)
 from .Util.CriteriaClass import CriteriaStruct
 from docx import Document
 from docx.shared import Pt
@@ -8,6 +9,10 @@ from sqlitehandler import SQLiteHandler
 from typing import Set, List, Dict
 from random import random, randint
 from .AlertWindowHandler import AlertWindow
+from .OutputWindowHandler import OutputWindowHandler
+import os
+import subprocess
+import shutil
 # handles the generation of random questions
 
 
@@ -47,6 +52,134 @@ class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
         self.pbOutputTxt.clicked.connect(self.SaveToText)
         self.sbMax.valueChanged.connect(self.ChangeMax)
         self.sbMin.valueChanged.connect(self.ChangeMin)
+        self.pbShowMarkscheme.clicked.connect(self.ShowMarkscheme)
+        self.pbTextMarkscheme.clicked.connect(self.SaveMarkschemeText)
+        self.pbMarkschemeDoc.clicked.connect(self.SaveMarkschemeDoc)
+
+    def OpenFile(self, fileName):
+        """
+        Try to open the file after saving it.
+        """
+        # trying a cross-platform method I found on SO
+        # https://stackoverflow.com/questions/6178154/open-a-text-file-using-notepad-as-a-help-file-in-python
+
+        if hasattr(os, "startfile"):
+            os.startfile(fileName)
+        elif shutil.which("xdg-open"):
+            subprocess.call(["xdg-open", fileName])
+        elif "EDITOR" in os.environ:
+            subprocess.call([os.environ["EDITOR"], fileName])
+
+    def SaveMarkschemeDoc(self):
+        """
+        Saves markscheme to word document
+        """
+        if len(self.currentQuestionIDs) == 0:
+            return
+        # save
+        try:
+            options = QFileDialog.Options()
+            fileName, _ = QFileDialog.getSaveFileName(
+                self, "Save File", "", "Word Document(*.docx)",
+                options=options)
+            if fileName:
+                # create document
+                document = Document()
+                # need to format it properly for document
+                # this involves putting each question as its own paragraph.
+                style = document.styles['Normal']
+                font = style.font
+                font.name = 'Arial'
+                font.size = Pt(12)
+                number = 1
+                for selectedid in self.currentQuestionIDs:
+                    text = GetFullMarkscheme(self.SQLSocket, selectedid,
+                                             number)
+                    number += 1
+                    paragraph = document.add_paragraph(text)
+                    paragraph.style = document.styles['Normal']
+                    # font and formatting
+                    # run = paragraph.add_run()
+                    # font = run.font
+                    # font.name = "Arial"
+                    # font.size = Pt(12)
+                paragraph = document.add_paragraph(
+                    f"Total marks: {self.TotalMarks}"
+                )
+                run = paragraph.add_run()
+                font = run.font
+                font.name = "Arial"
+                font.size = Pt(14)
+                font.bold = True
+                # save the document
+                document.save(fileName)
+                try:
+                    self.OpenFile(fileName)
+                except Exception as e:
+                    AlertWindow(f"Could not open the saved file: {e}")
+        except Exception as e:
+            AlertWindow("Could not save: " + str(e))
+
+    def ShowMarkscheme(self):
+        """
+        Show markscheme window with the paper markscheme
+        """
+        if len(self.currentQuestionIDs) == 0:
+            return
+        # get MS text
+        mstext = self.GetMarkschemeText()
+        output = OutputWindowHandler(
+            "Markscheme for generated paper",
+            mstext,
+            self
+        )
+
+    def SaveMarkschemeText(self):
+        """
+        Save markscheme to a text document.
+        Not to be confused with GetMarkschemeText
+        for getting markscheme text.
+        """
+        if len(self.currentQuestionIDs) == 0:
+            return
+        # get text
+        mstext = self.GetMarkschemeText()
+        try:
+            options = QFileDialog.Options()
+            fileName, _ = QFileDialog.getSaveFileName(
+                self, "Save File", "", "Text Files(*.txt)",
+                options=options)
+            if fileName:
+                with open(fileName, "w", encoding="utf-8") as f:
+                    # save file
+                    f.write(mstext)
+                try:
+                    self.OpenFile(fileName)
+                except Exception as e:
+                    AlertWindow(f"Saved file could not be opened: {e}")
+        except Exception as e:
+            AlertWindow("File could not be saved: " + str(e))
+
+    def GetMarkschemeText(self) -> str:
+        """
+        For generating .txt or just showing text.
+        Return None if not available
+        """
+        if len(self.currentQuestionIDs) == 0:
+            return
+
+        text = ""
+        number = 1
+        for questionID in self.currentQuestionIDs:
+            mstext = GetFullMarkscheme(self.SQLSocket, questionID,
+                                       number)
+            text += mstext
+            text += "\n"
+            number += 1
+
+        # add total marks at end
+        text += f"\nTotal marks: {self.TotalMarks}"
+        return text
 
     def ChangeMin(self):
         """
@@ -69,14 +202,21 @@ class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
         # it has writing so save
         text = self.teOutput.toPlainText()
         text += f"\nTotal Marks: {self.TotalMarks}"
-        options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "Text Files(*.txt)",
-            options=options)
-        if fileName:
-            with open(fileName, "w") as f:
-                # save file
-                f.write(text)
+        try:
+            options = QFileDialog.Options()
+            fileName, _ = QFileDialog.getSaveFileName(
+                self, "Save File", "", "Text Files(*.txt)",
+                options=options)
+            if fileName:
+                with open(fileName, "w", encoding="utf-8") as f:
+                    # save file
+                    f.write(text)
+                try:
+                    self.OpenFile(fileName)
+                except Exception as e:
+                    AlertWindow(f"Could not open the saved file: {e}")
+        except Exception as e:
+            AlertWindow(f"Could not save: {e}")
 
     def SaveToDoc(self):
         """
@@ -85,36 +225,44 @@ class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
         if not self.teOutput.toPlainText():
             return
         # save
-        text = self.teOutput.toPlainText()
-        options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "Word Document(*.docx)",
-            options=options)
-        if fileName:
-            # create document
-            document = Document()
-            # need to format it properly for document
-            # this involves putting each question as its own paragraph.
-            number = 1
-            for selectedid in self.currentQuestionIDs:
-                text = GetQuestionAndParts(self.SQLSocket, selectedid, number)
-                number += 1
-                paragraph = document.add_paragraph(text)
-                # font and formatting
+        try:
+            options = QFileDialog.Options()
+            fileName, _ = QFileDialog.getSaveFileName(
+                self, "Save File", "", "Word Document(*.docx)",
+                options=options)
+            if fileName:
+                # create document
+                document = Document()
+                style = document.styles['Normal']
+                font = style.font
+                font.name = 'Arial'
+                font.size = Pt(12)
+                # need to format it properly for document
+                # this involves putting each question as its own paragraph.
+                number = 1
+                for selectedid in self.currentQuestionIDs:
+                    text = GetQuestionAndParts(self.SQLSocket, selectedid,
+                                               number)
+                    number += 1
+                    paragraph = document.add_paragraph(text)
+                    # font and formatting
+                    paragraph.style = document.styles['Normal']
+                paragraph = document.add_paragraph(
+                    f"Total marks: {self.TotalMarks}"
+                )
                 run = paragraph.add_run()
                 font = run.font
-                font.name = "Calibri"
-                font.size = Pt(12)
-            paragraph = document.add_paragraph(
-                f"Total marks: {self.TotalMarks}"
-            )
-            run = paragraph.add_run()
-            font = run.font
-            font.name = "Calibri"
-            font.size = Pt(14)
-            font.bold = True
-            # save the document
-            document.save(fileName)
+                font.name = "Arial"
+                font.size = Pt(14)
+                font.bold = True
+                # save the document
+                document.save(fileName)
+                try:
+                    self.OpenFile(fileName)
+                except Exception as e:
+                    AlertWindow(f"Could not open the saved file: {e}")
+        except Exception as e:
+            AlertWindow(f"Could not save file: {e}")
 
     def SetupInputWidgets(self):
         """

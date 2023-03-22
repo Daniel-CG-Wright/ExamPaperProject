@@ -112,7 +112,7 @@ def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str,
     if overridenNumber != -1:
         questionnumber = overridenNumber
     questionstring = f"""
-    {paperdata[0][0]}
+    {paperdata[0][0]} Q{questiondata[0]}
     {questionnumber}. {questiondata[1]}
     """
     # if there are no parts then just add the total mark at the ned
