@@ -1,0 +1,25 @@
+List of all skipped questions that have been authorised.
+
+2018 COmponent 1 AS - Q3
+Truth tables/boolean algebra
+
+2019 component 2 - Q2
+floating point form
+
+2019 Unit 1 AS - Q5
+Truth tables
+
+2019 Unit 3 - Q1
+Markscheme is not processable - it is a bunch of text boxes
+Linked list, stacks+queues
+
+2019 Unit 3 - Q11
+OOP - question paper has a formatting error making this unparsable
+to the processor.
+
+2020 component 2 - Q4d and Q4e
+These parts were blocked by something that might be fixable with RE
+but currently is not worth it for 2 parts.
+2020. [] caused it to register 2020 as the question
+
+SQL statements

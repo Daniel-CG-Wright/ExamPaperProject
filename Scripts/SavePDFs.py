@@ -71,6 +71,8 @@ def main():
                     mstext = mstext.replace("\n", r"\n").replace("'", r"''")
                 except KeyError:
                     # set breakpoint here to see errors
+                    # for a list of known question skips
+                    # see the questionskips.txt
                     print("Skipping part: " + part.section)
                     continue
                 partinsert = f"""
