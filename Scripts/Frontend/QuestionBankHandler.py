@@ -52,7 +52,7 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         self.PopulateTable()
 
     def OnShowMarkscheme(self):
-        if len(self.twQuestionBank.selectedIndexes()) == 0:
+        if len(self.records) == 0:
             return
 
         selectedrowindex = self.twQuestionBank.currentRow()
@@ -74,14 +74,17 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         This involves adding the parts to the parts table,
         and adding the text in the textedit.
         """
-        selectedrowindex = self.twQuestionBank.currentRow()
-        questionid: str = self.records[selectedrowindex][0]
-        self.UpdatePartsTable(questionid)
-        questiontext = funchelpers.GetQuestionAndParts(
-            self.SQLsocket, questionid
-            )
-        self.teQuestionPreview.clear()
-        self.teQuestionPreview.setText(questiontext)
+        # to prevent the "no entries found" message from triggering
+        # an error.
+        if len(self.records) > 0:
+            selectedrowindex = self.twQuestionBank.currentRow()
+            questionid: str = self.records[selectedrowindex][0]
+            self.UpdatePartsTable(questionid)
+            questiontext = funchelpers.GetQuestionAndParts(
+                self.SQLsocket, questionid
+                )
+            self.teQuestionPreview.clear()
+            self.teQuestionPreview.setText(questiontext)
 
     def OutputNoEntriesMessage(self, tablePointer: QTableWidget):
         """"

@@ -1,4 +1,6 @@
 import sqlite3
+# for platform-neutral paths
+from pathlib import Path
 # run to reset the database.
 
 
@@ -10,7 +12,9 @@ class SQLiteHandler:
         """
 
         # connect, implicitly creating the database if it does not exist.
-        self.connection = sqlite3.connect("Database/ExamQuestions.db")
+        # create path first, should be platform-neutral
+        pathtodb = Path.cwd() / "Database" / "ExamQuestions.db"
+        self.connection = sqlite3.connect(pathtodb)
         self.cursor = self.connection.cursor()
 
     def Reset(self):
