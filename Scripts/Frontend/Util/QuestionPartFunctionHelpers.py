@@ -33,7 +33,7 @@ def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str,
     output = ""
     questionquery = f"""
     SELECT
-    QuestionNumber
+    QuestionNumber,
     MarkschemeContents
     FROM Question
     WHERE MarkschemeContents IS NOT NULL
@@ -44,10 +44,10 @@ def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str,
     if overridenNumber != -1:
         qnumber = overridenNumber
     if len(questionscheme[0]) > 1:
-        questionscheme = f"{qnumber}. "
-        questionscheme += questionscheme[0][1].replace(r"\n", "\n")
-        questionscheme = questionscheme.replace("''", "'")
-        output += questionscheme + "\n"
+        questionoutput = f"{qnumber}. "
+        questionoutput += questionscheme[0][1].replace(r"\n", "\n")
+        questionoutput = questionoutput.replace("''", "'")
+        output += questionoutput + "\n"
     partsquery = f"""
     SELECT
     PartNumber,

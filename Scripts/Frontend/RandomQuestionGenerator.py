@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QDialog, QComboBox, QTableWidgetItem
-from .Generated.RandomQuestionGenerated import Ui_RandomQuestionDialog
+from PyQt5.QtWidgets import QMainWindow, QComboBox, QTableWidgetItem
+from .Generated.RandomQuestionGenerated import Ui_RandomQuestionWindow
 from PyQt5.QtCore import Qt
 from .Util import QuestionPartFunctionHelpers as funchelpers
 from sqlitehandler import SQLiteHandler
@@ -9,7 +9,7 @@ from .OutputWindowHandler import OutputWindowHandler
 # handles the generation of random questions
 
 
-class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog):
+class RandomQuestionHandler(Ui_RandomQuestionWindow, QMainWindow):
 
     def __init__(self, parent=None):
         """
@@ -17,7 +17,6 @@ class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog):
         """
         super().__init__(parent)
         self.setupUi(self)
-        self.setModal(False)
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.SQLSocket = SQLiteHandler()
         self.currentQuestionID: str = ""
@@ -30,7 +29,6 @@ class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog):
         self.ConnectSignalSlots()
         self.GenerateQuestionPool()
         self.show()
-        self.exec()
 
     def ConnectSignalSlots(self):
         self.pbGenerate.clicked.connect(self.GenerateQuestion)
@@ -39,9 +37,23 @@ class RandomQuestionHandler(Ui_RandomQuestionDialog, QDialog):
         self.pbResetTopics.clicked.connect(self.ActivateConfirmation)
         self.pbConfirmReset.clicked.connect(self.ResetTable)
         self.cbComponent.currentTextChanged.connect(self.GenerateQuestionPool)
-        self.sbMax.valueChanged.connect(self.GenerateQuestionPool)
-        self.sbMin.valueChanged.connect(self.GenerateQuestionPool)
+        self.sbMax.valueChanged.connect(self.ChangeMax)
+        self.sbMin.valueChanged.connect(self.ChangeMin)
         self.checkBox0Parts.stateChanged.connect(self.GenerateQuestionPool)
+
+    def ChangeMin(self):
+        """
+        Update max so that it cannot be less than min
+        """
+        self.sbMax.setMinimum(self.sbMin.value())
+        self.GenerateQuestionPool()
+
+    def ChangeMax(self):
+        """
+        Update min so it cannot be greater than max.
+        """
+        self.sbMin.setMaximum(self.sbMax.value())
+        self.GenerateQuestionPool()
 
     def GenerateQuestion(self):
         """
@@ -121,10 +133,15 @@ WHERE
 
         if len(Criteria.topics) > 0:
             # get the topic
-            conditions.append(f"""
-            QuestionTopic.TopicID = '{Criteria.topics.pop()}'
-            AND QuestionTopic.QuestionID = Question.QuestionID
-            """)
+            # must do it for each topic
+            topicqueries: List[str] = []
+            for i in Criteria.topics:
+                topicqueries.append(f"""
+                (QuestionTopic.TopicID = '{i}'
+                AND QuestionTopic.QuestionID = Question.QuestionID)
+                """)
+            topicquery = "(" + " OR ".join(topicqueries) + ")"
+            conditions.append(topicquery)
 
         if Criteria.noParts:
             # restrict query to only select questions with 1 part.
@@ -152,7 +169,6 @@ WHERE
         """
         print(questionquery)
         results = self.SQLSocket.queryDatabase(questionquery)
-        print(results)
         self.currentQuestionPool = set(i[0] for i in results)
         self.lNumberOfQs.setText(
             f"Number of questions available: {len(self.currentQuestionPool)}"
@@ -208,6 +224,8 @@ WHERE
         self.AddRowToTopics()
         self.pbConfirmReset.setEnabled(False)
         self.pbResetTopics.setText("Reset Topics")
+        # update pool
+        self.GenerateQuestionPool()
 
     def ComboboxChanged(self):
         """
@@ -224,6 +242,8 @@ WHERE
         self.twTopics.setItem(
             self.twTopics.rowCount()-1, 0, QTableWidgetItem(str(value)))
         self.AddRowToTopics()
+        # update pool
+        self.GenerateQuestionPool()
 
     def SetupInputWidgets(self):
         """
@@ -256,6 +276,7 @@ WHERE
 
         self.cbComponent.clear()
         self.cbComponent.addItems(components)
+        self.GenerateQuestionPool()
 
 # NOTE when generating questions,
 # if no questions could be generated show an error message on the push button
@@ -284,3 +305,32 @@ INNER JOIN
         data = self.SQLSocket.queryDatabase(dataquery)[0]
         labeltext = f"Question {data[1]} from paper {data[0]}"
         output = OutputWindowHandler(labeltext, mstext, self)
+
+    def GetQuestionCriteria(self) -> CriteriaStruct:
+        """
+        Outputs criteriastruct from the criteria inputted.
+        """
+        # check component, level, topic to determine
+        # if they are on the first option
+        # (for all selection)
+        # if they are then we replace them with blanks
+        # so that we know not to include them as criteria
+        # in the SQL query
+        component = ""
+        if self.cbComponent.currentIndex() != 0:
+            component = self.cbComponent.currentText()
+        level = ""
+        if self.cbLevel.currentIndex() != 0:
+            level = self.cbLevel.currentText()
+        topics = set()
+        if len(self.selectedTopics) > 0:
+            topics = self.selectedTopics
+
+        return CriteriaStruct(
+            topics,
+            self.sbMin.value(),
+            self.sbMax.value(),
+            component,
+            level,
+            self.checkBox0Parts.isChecked()
+        )

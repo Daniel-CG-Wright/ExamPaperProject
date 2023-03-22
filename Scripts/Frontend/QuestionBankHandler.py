@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QTableWidgetItem, QTableWidget
+from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QTableWidget
 from .Generated.QuestionBankGenerated import Ui_ViewAllQuestions
 from PyQt5.QtCore import Qt
 from sqlitehandler import SQLiteHandler
@@ -10,7 +10,7 @@ from .OutputWindowHandler import OutputWindowHandler
 # handles the generation of random questions
 
 
-class QuestionBankHandler(Ui_ViewAllQuestions, QDialog):
+class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
 
     def __init__(self, parent=None):
         """
@@ -18,7 +18,6 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QDialog):
         """
         super().__init__(parent)
         self.setupUi(self)
-        self.setModal(False)
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.SQLsocket = SQLiteHandler()
         self.records: List[Tuple] = []
@@ -26,18 +25,31 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QDialog):
         self.ConnectSignalSlots()
 
         self.show()
-        self.exec()
 
     def ConnectSignalSlots(self):
         self.lineEdit.textChanged.connect(self.PopulateTable)
         self.cbSelectTopic.currentTextChanged.connect(self.PopulateTable)
         self.cbComponent.currentTextChanged.connect(self.PopulateTable)
         self.cbLevel.currentTextChanged.connect(self.OnLevelChange)
-        self.sbMax.valueChanged.connect(self.PopulateTable)
-        self.sbMin.valueChanged.connect(self.PopulateTable)
+        self.sbMax.valueChanged.connect(self.ChangeMax)
+        self.sbMin.valueChanged.connect(self.ChangeMin)
         self.twQuestionBank.cellClicked.connect(self.OnQuestionSelected)
         self.pbShowMarkscheme.clicked.connect(self.OnShowMarkscheme)
         self.checkBoxForSingleParts.stateChanged.connect(self.PopulateTable)
+
+    def ChangeMin(self):
+        """
+        Update max so that it cannot be less than min
+        """
+        self.sbMax.setMinimum(self.sbMin.value())
+        self.PopulateTable()
+
+    def ChangeMax(self):
+        """
+        Update min so it cannot be greater than max.
+        """
+        self.sbMin.setMaximum(self.sbMax.value())
+        self.PopulateTable()
 
     def OnShowMarkscheme(self):
         if len(self.twQuestionBank.selectedIndexes()) == 0:

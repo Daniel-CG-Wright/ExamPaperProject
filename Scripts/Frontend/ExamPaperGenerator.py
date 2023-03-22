@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from .Generated.ExamPaperGenerated import Ui_PaperGenerator
 from .Util.QuestionPartFunctionHelpers import GetQuestionAndParts
 from .Util.CriteriaClass import CriteriaStruct
@@ -6,11 +6,12 @@ from docx import Document
 from docx.shared import Pt
 from sqlitehandler import SQLiteHandler
 from typing import Set, List, Dict
-from random import random
+from random import random, randint
+from .AlertWindowHandler import AlertWindow
 # handles the generation of random questions
 
 
-class ExamPaperHandler(Ui_PaperGenerator, QDialog):
+class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
 
     def __init__(self, parent=None):
         """
@@ -34,9 +35,9 @@ class ExamPaperHandler(Ui_PaperGenerator, QDialog):
         # min marks for a question to be considered long
         self.MINLONGMARKS = 9
         self.currentQuestionIDs: List[str] = []
+        self.TotalMarks: int = 0
         self.SetupInputWidgets()
         self.ConnectSignalSlots()
-        self.exec()
         self.show()
 
     def ConnectSignalSlots(self):
@@ -44,6 +45,20 @@ class ExamPaperHandler(Ui_PaperGenerator, QDialog):
         self.cbLevel.currentTextChanged.connect(self.OnUpdateLevel)
         self.pbOutputToWord.clicked.connect(self.SaveToDoc)
         self.pbOutputTxt.clicked.connect(self.SaveToText)
+        self.sbMax.valueChanged.connect(self.ChangeMax)
+        self.sbMin.valueChanged.connect(self.ChangeMin)
+
+    def ChangeMin(self):
+        """
+        Update max so that it cannot be less than min
+        """
+        self.sbMax.setMinimum(self.sbMin.value())
+
+    def ChangeMax(self):
+        """
+        Update min so it cannot be greater than max.
+        """
+        self.sbMin.setMaximum(self.sbMax.value())
 
     def SaveToText(self):
         """
@@ -53,6 +68,7 @@ class ExamPaperHandler(Ui_PaperGenerator, QDialog):
             return
         # it has writing so save
         text = self.teOutput.toPlainText()
+        text += f"\nTotal Marks: {self.TotalMarks}"
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(
             self, "Save File", "", "Text Files(*.txt)",
@@ -89,6 +105,14 @@ class ExamPaperHandler(Ui_PaperGenerator, QDialog):
                 font = run.font
                 font.name = "Calibri"
                 font.size = Pt(12)
+            paragraph = document.add_paragraph(
+                f"Total marks: {self.TotalMarks}"
+            )
+            run = paragraph.add_run()
+            font = run.font
+            font.name = "Calibri"
+            font.size = Pt(14)
+            font.bold = True
             # save the document
             document.save(fileName)
 
@@ -166,7 +190,7 @@ AND {levelquery}
         """
         topicsdata = self.SQLSocket.queryDatabase(getTopicsQuery)
         # all the topics to choose from.
-        availabletopics = set([i[0] for i in topicsdata])
+        availabletopics = list([i[0] for i in topicsdata])
         currentMarks: int = 0
         # store the selected question IDs for use in the paper
         selectedQuestionIDs: List[str] = []
@@ -188,8 +212,9 @@ AND {levelquery})
 AND Question.TotalMarks >= {self.MINLONGMARKS}
         """
             longanswers = self.SQLSocket.queryDatabase(longanswerquery)
-            availablelonganswers = set([i[0] for i in longanswers])
-            longanswerquestionid = availablelonganswers.pop()
+            availablelonganswers = list([i[0] for i in longanswers])
+            longanswerquestionid = availablelonganswers.pop(
+                randint(0, len(availablelonganswers)-1))
             longanswermarks = f"""
             SELECT TotalMarks FROM Question
             WHERE QuestionID = '{longanswerquestionid}'
@@ -207,7 +232,9 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
         normmin = criteria.minmarks + margin
         while currentMarks < normmin:
             # add topic
-            chosentopic = availabletopics.pop()
+            chosentopic = availabletopics.pop(
+                randint(0, len(availabletopics)-1)
+            )
             # this query gets all the possible question ids
             availablequestionsidsquery = f"""
             SELECT QuestionID FROM QuestionTopic WHERE
@@ -219,10 +246,17 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
                     availablequestionsidsquery)])
             # remove any questions we have already done
             availablequestionids.difference(selectedQuestionIDs)
+            availablequestionids = list(availablequestionids)
             while len(availablequestionids) > 0:
                 # keep going until we find a question not
                 # exceeding the max marks.
-                selectedid = availablequestionids.pop()
+                selectedid = availablequestionids.pop(
+                    randint(0, len(availablequestionids)-1)
+                )
+                # if selected id in the question ids then do
+                # not insert
+                if selectedid in selectedQuestionIDs:
+                    continue
                 marksquery = f"""
                 SELECT TotalMarks FROM Question
                 WHERE QuestionID = '{selectedid}'
@@ -237,10 +271,21 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
                     # insert at start so long answer is at end
                     selectedQuestionIDs.insert(0, selectedid)
                     break
+            # if the topics list is empty
+            if len(availabletopics) == 0:
+                if currentMarks < criteria.minmarks:
+                    # if the min has not been reached
+                    # we will output a message to the user
+                    alert = AlertWindow("""
+                    The paper generated could not exceed
+                    the minimum marks. Regenerate the paper to try again.
+                    """)
+                break
 
         # we now have all the qeustion ids
         # we can now create the question paper
         self.currentQuestionIDs = selectedQuestionIDs.copy()
+        self.TotalMarks = currentMarks
         self.OutputQuestionPaper(selectedQuestionIDs)
 
     def OutputQuestionPaper(self, selectedQuestionIDs: list):
@@ -259,6 +304,9 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
 
         # output to textedit
         self.teOutput.setText(outputtext)
+        # output marks
+        self.lMarksOutput.setText(
+            f"Total marks: {self.TotalMarks}")
 
     def GetQuestionCriteria(self) -> CriteriaStruct:
         """
