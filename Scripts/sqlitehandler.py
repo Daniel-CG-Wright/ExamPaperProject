@@ -1,7 +1,8 @@
 import sqlite3
 # for platform-neutral paths
 from pathlib import Path
-# run to reset the database.
+# run to reset the database
+# (not available in this version - end users are not given this)
 
 
 class SQLiteHandler:
@@ -140,5 +141,6 @@ class SQLiteHandler:
 
 
 if __name__ == "__main__":
-    sqlsocket = SQLiteHandler()
-    sqlsocket.Reset()
+    # sqlsocket = SQLiteHandler()
+    # sqlsocket.Reset()
+    pass
