@@ -318,7 +318,6 @@ WHERE
     Paper.PaperLevel,
     Question.QuestionNumber
         """
-        print(questionquery)
         self.records = self.SQLsocket.queryDatabase(questionquery)
 
     def SetupInputWidgets(self):

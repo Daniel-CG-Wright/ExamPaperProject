@@ -167,7 +167,6 @@ WHERE
         GROUP BY
     Question.QuestionID
         """
-        print(questionquery)
         results = self.SQLSocket.queryDatabase(questionquery)
         self.currentQuestionPool = set(i[0] for i in results)
         self.lNumberOfQs.setText(
