@@ -458,20 +458,10 @@ class PDFReading:
         for keyword in TOPICKEYWORDS:
             # need to make sure it is a full match (match whole
             # word only)
-            doesBelong = False
             for i in TOPICKEYWORDS[keyword]:
-                block = False
-                if i[0] == "!":
-                    block = True
-                    i = i[1:]
                 search = re.search(r"\b" + i.lower() + r"\b", lowerquestion)
-                if search and not block:
+                if search:
                     # mark it
-                    doesBelong = True
+                    keywords.add(keyword)
                     break
-                elif block:
-                    doesBelong = False
-                    break
-            if doesBelong:
-                keywords.add(keyword)
         return keywords

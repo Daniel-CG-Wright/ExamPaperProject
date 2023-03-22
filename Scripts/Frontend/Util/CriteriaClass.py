@@ -35,8 +35,8 @@ TOPICKEYWORDS: Dict[str, str] = {
     "Big O":
     ["Big O", "Time complexity"],
     "Systems":
-    ["Safety critical", "control system", "weather forecasting",
-     "robotics", "CAD", "Computer Aided Design", "!stock control system"],
+    ["Safety critical", "weather forecasting",
+     "robotics", "CAD", "Computer Aided Design"],
     "Computer architecture":
     ["von neumann", "cache", "control unit"],
     "Assembly language":
