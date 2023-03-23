@@ -66,6 +66,8 @@ def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str,
             contents = f"{partnumber}. "
             contents += i[1].replace(r"\n", "\n").replace("''", "'")
             output += contents
+            output += "\n"
+
     return output
 
 

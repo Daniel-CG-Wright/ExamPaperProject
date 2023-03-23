@@ -21,5 +21,11 @@ to the processor.
 These parts were blocked by something that might be fixable with RE
 but currently is not worth it for 2 parts.
 2020. [] caused it to register 2020 as the question
-
 SQL statements
+
+2021 Component 2 - Q3
+Blocked by same problem as 2020.
+Assembly language
+
+2021 Component 2 - Q11
+Download speeds and encryption (?)

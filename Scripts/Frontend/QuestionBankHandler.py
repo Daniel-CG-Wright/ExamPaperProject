@@ -33,7 +33,7 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         self.cbLevel.currentTextChanged.connect(self.OnLevelChange)
         self.sbMax.valueChanged.connect(self.ChangeMax)
         self.sbMin.valueChanged.connect(self.ChangeMin)
-        self.twQuestionBank.cellClicked.connect(self.OnQuestionSelected)
+        self.twQuestionBank.currentCellChanged.connect(self.OnQuestionSelected)
         self.pbShowMarkscheme.clicked.connect(self.OnShowMarkscheme)
         self.checkBoxForSingleParts.stateChanged.connect(self.PopulateTable)
 
@@ -172,7 +172,6 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         headers: list[str] = [
             "Paper",
             "No.",
-            "Parts",
             "Text",
             "Marks (total)",
             "Topics"
@@ -224,7 +223,6 @@ SELECT
     (Paper.PaperYear || '-' ||
     Paper.PaperComponent || '-' || Paper.PaperLevel),
     Question.QuestionNumber,
-    COUNT(Parts.PartID),
     Question.QuestionContents,
     Question.TotalMarks
 FROM
@@ -271,9 +269,8 @@ WHERE
         if Criteria.contentsearch:
             # get the search criteria
             conditions.append(f"""
-            Question.QuestionContents LIKE '%{Criteria.contentsearch}%' OR
-            Parts.PartContents LIKE '%{Criteria.contentsearch}%' AND
-            Parts.QuestionID = Question.QuestionID
+            (Question.QuestionContents LIKE '%{Criteria.contentsearch}%' OR
+            Parts.PartContents LIKE '%{Criteria.contentsearch}%')
             """)
 
         if len(Criteria.topics) > 0:

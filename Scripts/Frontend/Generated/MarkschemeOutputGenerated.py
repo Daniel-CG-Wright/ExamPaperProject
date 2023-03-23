@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'markschemeoutput.ui'
+# Form implementation generated from reading ui file 'markschemeoutputmainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -14,13 +14,15 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_TextDialog(object):
     def setupUi(self, TextDialog):
         TextDialog.setObjectName("TextDialog")
-        TextDialog.resize(400, 282)
+        TextDialog.resize(558, 500)
         font = QtGui.QFont()
-        font.setPointSize(12)
+        font.setPointSize(11)
         TextDialog.setFont(font)
-        self.verticalLayout = QtWidgets.QVBoxLayout(TextDialog)
+        self.centralwidget = QtWidgets.QWidget(TextDialog)
+        self.centralwidget.setObjectName("centralwidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.lMarkschemeNotice = QtWidgets.QLabel(TextDialog)
+        self.lMarkschemeNotice = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -28,11 +30,12 @@ class Ui_TextDialog(object):
         self.lMarkschemeNotice.setSizePolicy(sizePolicy)
         self.lMarkschemeNotice.setObjectName("lMarkschemeNotice")
         self.verticalLayout.addWidget(self.lMarkschemeNotice)
-        self.textEdit = QtWidgets.QTextEdit(TextDialog)
+        self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
         self.textEdit.setUndoRedoEnabled(False)
         self.textEdit.setReadOnly(True)
         self.textEdit.setObjectName("textEdit")
         self.verticalLayout.addWidget(self.textEdit)
+        TextDialog.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(TextDialog)
         QtCore.QMetaObject.connectSlotsByName(TextDialog)

@@ -6,6 +6,7 @@ from sqlitehandler import SQLiteHandler
 from .Util.CriteriaClass import CriteriaStruct, TOPICKEYWORDS
 from typing import List, Set
 from .OutputWindowHandler import OutputWindowHandler
+from random import randint
 # handles the generation of random questions
 
 
@@ -24,7 +25,7 @@ class RandomQuestionHandler(Ui_RandomQuestionWindow, QMainWindow):
         self.currentCombobox: QComboBox = ""
         # question pool is for all the potential random
         # question ids that can be picked.
-        self.currentQuestionPool: Set[str] = set()
+        self.currentQuestionPool: List[str] = []
         self.SetupInputWidgets()
         self.ConnectSignalSlots()
         self.GenerateQuestionPool()
@@ -59,7 +60,8 @@ class RandomQuestionHandler(Ui_RandomQuestionWindow, QMainWindow):
         """
         Generates a random question from the question pool.
         """
-        question = self.currentQuestionPool.pop()
+        question = self.currentQuestionPool.pop(
+            randint(0, len(self.currentQuestionPool)-1))
         self.currentQuestionID = question
         text = funchelpers.GetQuestionAndParts(self.SQLSocket, question)
         self.teRandomQuestion.setText(text)
@@ -167,9 +169,8 @@ WHERE
         GROUP BY
     Question.QuestionID
         """
-        print(questionquery)
         results = self.SQLSocket.queryDatabase(questionquery)
-        self.currentQuestionPool = set(i[0] for i in results)
+        self.currentQuestionPool = list(i[0] for i in results)
         self.lNumberOfQs.setText(
             f"Number of questions available: {len(self.currentQuestionPool)}"
         )

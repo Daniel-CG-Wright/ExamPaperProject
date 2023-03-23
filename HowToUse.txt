@@ -1,0 +1,16 @@
+Question bank:
+Top edit is the search bar. Search the contents of questions and their sub-parts
+You can select questions only from sepcific components or levels, or from a specific topic.
+You can filter by min and max marks for the entire question (all parts included).
+
+Random question generator:
+Add topics to the table. Any of the topics in the table can be generated.
+No topics selected = all topics allowed.
+Filter by min and max total marks, component and level as usual.
+
+Exam paper generator:
+Select the min and max marks for the paper. The program
+will try to generate a paper with marks around the middle of this.
+Select the component and level.
+You can save to a word document, or a txt file, if desired.
+

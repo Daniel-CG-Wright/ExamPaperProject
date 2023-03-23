@@ -1,10 +1,10 @@
 # to handle the text output window
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QMainWindow
 from .Generated.MarkschemeOutputGenerated import Ui_TextDialog
 from PyQt5.QtCore import Qt
 
 
-class OutputWindowHandler(Ui_TextDialog, QDialog):
+class OutputWindowHandler(Ui_TextDialog, QMainWindow):
 
     def __init__(self, labelText, outputText, parent=None):
         """
@@ -14,7 +14,6 @@ class OutputWindowHandler(Ui_TextDialog, QDialog):
         """
         super().__init__(parent)
         self.setupUi(self)
-        self.setModal(False)
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.lMarkschemeNotice.setText(labelText)
         self.textEdit.setText(outputText)

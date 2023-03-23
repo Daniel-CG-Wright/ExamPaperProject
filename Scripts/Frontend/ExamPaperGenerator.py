@@ -303,10 +303,6 @@ class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
         # we want to preferably only have 1 question from each major topic
         # for the component
         # so we will have to overwrite question criteria
-        if random() <= self.LONGANSWERPROBABILITY:
-            doLongAnswerQuestionAtEnd = True
-        else:
-            doLongAnswerQuestionAtEnd = False
         criteria = self.GetQuestionCriteria()
         # we will get all the topics for the component selected
         # using an SQL query.
@@ -342,12 +338,11 @@ AND {levelquery}
         currentMarks: int = 0
         # store the selected question IDs for use in the paper
         selectedQuestionIDs: List[str] = []
-        if doLongAnswerQuestionAtEnd:
-            # if makeing the topic unique then you have to add thi spart first
-            # to reserve the topic used by the long answer question.
-            # get the long answer question too
-            longanswerquery = f"""
-            SELECT Question.QuestionID
+        # if makeing the topic unique then you have to add thi spart first
+        # to reserve the topic used by the long answer question.
+        # get the long answer question too
+        longanswerquery = f"""
+        SELECT Question.QuestionID
 FROM QUESTION
 JOIN QUESTIONTOPIC ON Question.QuestionID = QUESTIONTOPIC.QuestionID
 WHERE QuestionTopic.TopicID IN
@@ -358,19 +353,19 @@ JOIN Paper ON Question.PaperID = Paper.PaperID
 WHERE {componentquery}
 AND {levelquery})
 AND Question.TotalMarks >= {self.MINLONGMARKS}
+    """
+        longanswers = self.SQLSocket.queryDatabase(longanswerquery)
+        availablelonganswers = list([i[0] for i in longanswers])
+        longanswerquestionid = availablelonganswers[
+            randint(0, len(availablelonganswers)-1)]
+        longanswermarks = f"""
+        SELECT TotalMarks FROM Question
+        WHERE QuestionID = '{longanswerquestionid}'
         """
-            longanswers = self.SQLSocket.queryDatabase(longanswerquery)
-            availablelonganswers = list([i[0] for i in longanswers])
-            longanswerquestionid = availablelonganswers.pop(
-                randint(0, len(availablelonganswers)-1))
-            longanswermarks = f"""
-            SELECT TotalMarks FROM Question
-            WHERE QuestionID = '{longanswerquestionid}'
-            """
-            longanswermarks = self.SQLSocket.queryDatabase(longanswermarks)[
-                0][0]
-            currentMarks += longanswermarks
-            selectedQuestionIDs.append(longanswerquestionid)
+        longanswermarks = self.SQLSocket.queryDatabase(longanswermarks)[
+            0][0]
+        currentMarks += longanswermarks
+        selectedQuestionIDs.append(longanswerquestionid)
 
         # for a bunch of random topics we get a question then
         # remove it from the available topics
@@ -403,7 +398,10 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
                 )
                 # if selected id in the question ids then do
                 # not insert
-                if selectedid in selectedQuestionIDs:
+                if (
+                    selectedid in selectedQuestionIDs or
+                    selectedid in availablelonganswers
+                ):
                     continue
                 marksquery = f"""
                 SELECT TotalMarks FROM Question
