@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>786</height>
+    <height>820</height>
    </rect>
   </property>
   <property name="font">
@@ -194,21 +194,21 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QPushButton" name="pbEditQuestion">
+       <widget class="QPushButton" name="pbAddQuestion">
         <property name="text">
          <string>Add Question</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pbDeleteQuestion">
+       <widget class="QPushButton" name="pbEditQuestion">
         <property name="text">
          <string>Edit Question</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pbAddQuestion">
+       <widget class="QPushButton" name="pbDeleteQuestion">
         <property name="text">
          <string>Delete question</string>
         </property>

@@ -7,6 +7,7 @@ from typing import List, Tuple
 import re
 from .Util import QuestionPartFunctionHelpers as funchelpers
 from .OutputWindowHandler import OutputWindowHandler
+from .AddEditWindowHandler import AddEditWindowHandler
 # handles the generation of random questions
 
 
@@ -36,6 +37,14 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         self.twQuestionBank.currentCellChanged.connect(self.OnQuestionSelected)
         self.pbShowMarkscheme.clicked.connect(self.OnShowMarkscheme)
         self.checkBoxForSingleParts.stateChanged.connect(self.PopulateTable)
+        self.pbAddQuestion.clicked.connect(self.OpenAddQuestionMenu)
+
+    def OpenAddQuestionMenu(self):
+        """
+        Open the menu for adding questions
+        """
+        print("hey")
+        handler = AddEditWindowHandler(self)
 
     def ChangeMin(self):
         """
