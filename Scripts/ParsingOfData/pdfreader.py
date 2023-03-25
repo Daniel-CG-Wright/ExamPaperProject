@@ -1,7 +1,7 @@
 # pdfreader.py
 # reads PDF files to a PDF reader object
 import PyPDF2
-from question import Question, Part
+from Frontend.Util.question import Question, Part
 from typing import List, Dict, Set, Tuple
 import re
 from Frontend.Util.CriteriaClass import TOPICKEYWORDS

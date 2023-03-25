@@ -7,7 +7,7 @@ from docx import Document
 from PyPDF2 import PdfReader
 import re
 from typing import Dict, List, Tuple
-from question import Markscheme
+from Frontend.Util.question import Markscheme
 
 
 class MarkschemeParser:
