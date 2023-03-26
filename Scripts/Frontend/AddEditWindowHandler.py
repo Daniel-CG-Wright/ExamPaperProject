@@ -52,16 +52,29 @@ WHERE Question.QuestionID = '{self.editQuestionID}'
         else:
             return
         self.cbComponent.setCurrentText(results[0])
-        self.deYear.setDate(QDate(results[2], 1, 1))
+        self.deYear.setDate(QDate(int(results[2]), 1, 1))
         # set the question text
         self.textEdit.setPlainText(results[3])
         # set the level
         self.cbLevel.setCurrentText(results[1])
         # set the marks
         self.sbMarks.setValue(results[4])
+        # set the question number
+        self.sbQNumber.setValue(results[5])
+        # disable the question number so that it cannot be edited
+        self.sbQNumber.setEnabled(False)
+        # set the topics
+        topicquery = f"""
+SELECT TopicID
+FROM QuestionTopic
+WHERE QuestionID = '{self.editQuestionID}'
+        """
+        topicresults = self.SQLSocket.queryDatabase(topicquery)
+        self.topics = [i[0] for i in topicresults]
+
         # set the parts
         partsquery = f"""
-        SELECT Part.PartContents, Part.PartMarks, Part.PartNumber
+        SELECT Parts.PartContents, Parts.PartMarks, Parts.PartNumber
         FROM Parts
         WHERE Parts.QuestionID = '{self.editQuestionID}'
         """

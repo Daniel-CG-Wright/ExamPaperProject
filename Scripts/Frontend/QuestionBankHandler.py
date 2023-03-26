@@ -8,6 +8,8 @@ import re
 from .Util import QuestionPartFunctionHelpers as funchelpers
 from .OutputWindowHandler import OutputWindowHandler
 from .AddEditWindowHandler import AddEditWindowHandler
+from .AlertWindowHandler import AlertWindow
+from .ConfirmWindowHandler import ConfirmWindow
 # handles the generation of random questions
 
 
@@ -21,6 +23,7 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         self.setupUi(self)
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.SQLsocket = SQLiteHandler()
+        # first index stores question id
         self.records: List[Tuple] = []
         self.SetupInputWidgets()
         self.ConnectSignalSlots()
@@ -38,6 +41,39 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         self.pbShowMarkscheme.clicked.connect(self.OnShowMarkscheme)
         self.checkBoxForSingleParts.stateChanged.connect(self.PopulateTable)
         self.pbAddQuestion.clicked.connect(self.OpenAddQuestionMenu)
+        self.pbEditQuestion.clicked.connect(self.OpenEditQuestionMenu)
+        self.pbDeleteQuestion.clicked.connect(self.OnDeleteQuestion)
+
+    def OnDeleteQuestion(self):
+        """
+        Delete a question from the SQL database then update the table
+        """
+        if len(self.twQuestionBank.selectedIndexes()) == 0:
+            return
+
+        # get confirmation from confirm window first
+        confirm = ConfirmWindow(
+            "Are you sure you want to delete this question?")
+        if confirm.LeftButtonPressed:
+            selectedrowindex = self.twQuestionBank.currentRow()
+            questionid = self.records[selectedrowindex][0]
+            deletequery = f"""
+            DELETE FROM Question WHERE QuestionID = '{questionid}'
+            """
+            self.SQLsocket.addToDatabase(deletequery)
+            # delete parts
+            deletequery = f"""
+            DELETE FROM Parts WHERE QuestionID = '{questionid}'
+            """
+            self.SQLsocket.addToDatabase(deletequery)
+            # delete images
+            deletequery = f"""
+            DELETE FROM Images WHERE QuestionID = '{questionid}'
+            """
+            self.SQLsocket.addToDatabase(deletequery)
+            # show success message
+            AlertWindow("Question deleted successfully")
+            self.PopulateTable()
 
     def OpenEditQuestionMenu(self):
         """
@@ -48,7 +84,7 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
             return
 
         handler = AddEditWindowHandler(
-            self.records[self.twQuestionBank.currentRow()], parent=self)
+            self.records[self.twQuestionBank.currentRow()][0], parent=self)
         # update table
         self.PopulateTable()
 
