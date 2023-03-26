@@ -39,12 +39,26 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         self.checkBoxForSingleParts.stateChanged.connect(self.PopulateTable)
         self.pbAddQuestion.clicked.connect(self.OpenAddQuestionMenu)
 
+    def OpenEditQuestionMenu(self):
+        """
+        Open the add question menu but in edit mode
+        """
+        # check that a row is selected
+        if len(self.twQuestionBank.selectedIndexes()) == 0:
+            return
+
+        handler = AddEditWindowHandler(
+            self.records[self.twQuestionBank.currentRow()], parent=self)
+        # update table
+        self.PopulateTable()
+
     def OpenAddQuestionMenu(self):
         """
         Open the menu for adding questions
         """
-        print("hey")
-        handler = AddEditWindowHandler(self)
+        handler = AddEditWindowHandler(parent=self)
+        # update table
+        self.PopulateTable()
 
     def ChangeMin(self):
         """
@@ -238,7 +252,7 @@ FROM
     Paper
     JOIN Question ON Paper.PaperID = Question.PaperID
     LEFT JOIN Parts ON Question.QuestionID = Parts.QuestionID
-    JOIN QuestionTopic ON Question.QuestionID = QuestionTopic.QuestionID
+    LEFT JOIN QuestionTopic ON Question.QuestionID = QuestionTopic.QuestionID
 WHERE
         """
         # stores conditions to add to the SQL query

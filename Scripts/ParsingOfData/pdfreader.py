@@ -167,7 +167,7 @@ class PDFReading:
         # bla bla
         typescounters: Dict[str, bool] = {
             r"\d+[.]": False,
-            r"\([abcdefgh]\)": False,
+            r"\([a-h]\)": False,
             r"\([iv]+\)": False
             }
 
@@ -185,7 +185,7 @@ class PDFReading:
                 re.search(r"\d+[.]", element) and
                 not typescounters[r"\d+[.]"] and
                 (typescounters[r"\([iv]+\)"] or
-                    typescounters[r"\([abcdefgh]\)"]
+                    typescounters[r"\([a-h]\)"]
                  )
             ):
                 questionparts = questionparts[index:]
@@ -214,7 +214,7 @@ class PDFReading:
         # as I am scared to add newline characters and break everyhting
         self.questionspartsindex: Dict[str, Question | Part] = {}
         questionpartsandnumber = re.compile(
-            r"^\d+[.](?=\s)|(?<=\s)\([abcdefgh]\)(?=\s)|^\([abcdefgh]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)",
+            r"^\d+[.](?=\s)|(?<=\s)\([a-h]\)(?=\s)|^\([a-h]\)(?=\s)|^\([iv]+\)(?=\s)|(?<=\s)\([iv]+\)(?=\s)",
             re.M
             )
 

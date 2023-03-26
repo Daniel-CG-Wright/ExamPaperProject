@@ -64,7 +64,9 @@ class SQLiteHandler:
             CREATE TABLE IMAGES(
   ImageID INTEGER PRIMARY KEY NOT NULL,
   QuestionID VARCHAR(50),
+  ImageName TEXT,
   ImageData BLOB,
+  ImageFormat VARCHAR(10),
   IsPartOfMarkscheme INTEGER
 );
 
@@ -123,6 +125,33 @@ class SQLiteHandler:
             try:
                 # print(query)
                 self.connection.executescript(query)
+                # Commits the executed query to ensure changes are made.
+                self.connection.commit()
+                return True, "placeholder_exception"
+            except sqlite3.Error as e:
+                print(query)
+                print(e)
+                return False, e
+        except Exception as e:
+            print(e)
+            return False, e
+
+    def AddParameterizedQueryToDatabase(self, query: str, parameters: tuple):
+        """Adds a parameterized query to the database. Returns False if an
+        error occurs, as well as the error.
+            Args:
+                query(str) - the SQL query to be executed.
+                parameters(tuple) - a tuple of the parameters to be inserted
+                into the query.
+            Returns:
+                tuple(boolean, exception) - A tuple of the boolean for whether
+                the execution was successful, and the exception returned
+                (or "placeholder_exception" if no exception)
+        """
+        try:
+            try:
+                # print(query)
+                self.cursor.execute(query, parameters)
                 # Commits the executed query to ensure changes are made.
                 self.connection.commit()
                 return True, "placeholder_exception"
