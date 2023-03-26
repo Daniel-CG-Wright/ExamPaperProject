@@ -7,6 +7,7 @@ from .Util.CriteriaClass import CriteriaStruct, TOPICKEYWORDS
 from typing import List, Set
 from .OutputWindowHandler import OutputWindowHandler
 from random import randint
+from .ImagesViewHandler import ImagesViewHandler
 # handles the generation of random questions
 
 
@@ -41,6 +42,15 @@ class RandomQuestionHandler(Ui_RandomQuestionWindow, QMainWindow):
         self.sbMax.valueChanged.connect(self.ChangeMax)
         self.sbMin.valueChanged.connect(self.ChangeMin)
         self.checkBox0Parts.stateChanged.connect(self.GenerateQuestionPool)
+        self.pbShowImagesForQuestion.clicked.connect(self.ShowImages)
+
+    def ShowImages(self):
+        """
+        Shows images for the current question
+        """
+        if not self.currentQuestionID:
+            return
+        ImagesViewHandler([self.currentQuestionID], False, self)
 
     def ChangeMin(self):
         """

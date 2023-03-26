@@ -10,6 +10,7 @@ from .OutputWindowHandler import OutputWindowHandler
 from .AddEditWindowHandler import AddEditWindowHandler
 from .AlertWindowHandler import AlertWindow
 from .ConfirmWindowHandler import ConfirmWindow
+from .ImagesViewHandler import ImagesViewHandler
 # handles the generation of random questions
 
 
@@ -43,6 +44,18 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         self.pbAddQuestion.clicked.connect(self.OpenAddQuestionMenu)
         self.pbEditQuestion.clicked.connect(self.OpenEditQuestionMenu)
         self.pbDeleteQuestion.clicked.connect(self.OnDeleteQuestion)
+        self.pbViewImages.clicked.connect(self.ShowImages)
+
+    def ShowImages(self):
+        """
+        Open the show images dialog
+        """
+        if len(self.twQuestionBank.selectedIndexes()) == 0:
+            return
+
+        selectedrowindex = self.twQuestionBank.currentRow()
+        questionid = self.records[selectedrowindex][0]
+        ImagesViewHandler([questionid], False, self)
 
     def OnDeleteQuestion(self):
         """
@@ -69,6 +82,11 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
             # delete images
             deletequery = f"""
             DELETE FROM Images WHERE QuestionID = '{questionid}'
+            """
+            self.SQLsocket.addToDatabase(deletequery)
+            # delete topics
+            deletequery = f"""
+            DELETE FROM QuestionTopic WHERE QuestionID = '{questionid}'
             """
             self.SQLsocket.addToDatabase(deletequery)
             # show success message

@@ -35,6 +35,9 @@ class Ui_TextDialog(object):
         self.textEdit.setReadOnly(True)
         self.textEdit.setObjectName("textEdit")
         self.verticalLayout.addWidget(self.textEdit)
+        self.pbShowImages = QtWidgets.QPushButton(self.centralwidget)
+        self.pbShowImages.setObjectName("pbShowImages")
+        self.verticalLayout.addWidget(self.pbShowImages)
         TextDialog.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(TextDialog)
@@ -44,3 +47,4 @@ class Ui_TextDialog(object):
         _translate = QtCore.QCoreApplication.translate
         TextDialog.setWindowTitle(_translate("TextDialog", "Markscheme"))
         self.lMarkschemeNotice.setText(_translate("TextDialog", "TextLabel"))
+        self.pbShowImages.setText(_translate("TextDialog", "Show markscheme images"))

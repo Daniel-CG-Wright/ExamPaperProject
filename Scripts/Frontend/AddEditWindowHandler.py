@@ -450,7 +450,7 @@ WHERE QuestionID = '{self.editQuestionID}'
             '{questionid}',
             '{image.name}',
             ?,
-            {image.isMarkscheme},
+            {int(image.isMarkscheme)},
             '{image.format}'
             )
             """

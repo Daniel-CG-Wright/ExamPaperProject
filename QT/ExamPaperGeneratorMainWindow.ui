@@ -96,6 +96,13 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
+       <widget class="QPushButton" name="pbShowImages">
+        <property name="text">
+         <string>Show images</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbOutputTxt">
         <property name="text">
          <string>Output To Text</string>

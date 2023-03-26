@@ -13,6 +13,7 @@ from .OutputWindowHandler import OutputWindowHandler
 import os
 import subprocess
 import shutil
+from .ImagesViewHandler import ImagesViewHandler
 # handles the generation of random questions
 
 
@@ -55,6 +56,15 @@ class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
         self.pbShowMarkscheme.clicked.connect(self.ShowMarkscheme)
         self.pbTextMarkscheme.clicked.connect(self.SaveMarkschemeText)
         self.pbMarkschemeDoc.clicked.connect(self.SaveMarkschemeDoc)
+        self.pbShowImages.clicked.connect(self.ShowImages)
+
+    def ShowImages(self):
+        """
+        Shows images for the current question
+        """
+        if len(self.currentQuestionIDs) == 0:
+            return
+        ImagesViewHandler(self.currentQuestionIDs, False, parent=self)
 
     def OpenFile(self, fileName):
         """

@@ -84,5 +84,5 @@ class Ui_MainWindow(object):
         self.pbSearchSort.setText(_translate("MainWindow", "View all questions (search/sort)"))
         self.pbGenerateQuestions.setText(_translate("MainWindow", "Random questions"))
         self.pbGeneratePapers.setText(_translate("MainWindow", "Generate random exam papers"))
-        self.lversionandtitle.setText(_translate("MainWindow", "v0.0"))
+        self.lversionandtitle.setText(_translate("MainWindow", "v1.1"))
         self.lTip.setText(_translate("MainWindow", "Refer to the documentation for help."))

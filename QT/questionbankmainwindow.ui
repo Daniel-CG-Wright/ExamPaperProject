@@ -192,6 +192,13 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="pbViewImages">
+      <property name="text">
+       <string>View images for this question</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QPushButton" name="pbAddQuestion">
