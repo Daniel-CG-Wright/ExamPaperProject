@@ -16,10 +16,12 @@ class Image:
         self.format = format
 
 
-def AreImagesAvailable(questionids: List[str]) -> bool:
+def AreImagesAvailable(questionids: List[str], isMarkscheme=False) -> bool:
     """
     Checks if there are images available for the given questionids.
     If there is at least 1, return True, else False
+    if markscheem is True, check for markscheme images,
+    else check for normal images
     """
     if not questionids:
         return False
@@ -29,6 +31,7 @@ def AreImagesAvailable(questionids: List[str]) -> bool:
         query = f"""
         SELECT * FROM Images
         WHERE QuestionID = '{questionid}'
+        AND IsPartOfMarkscheme = {int(isMarkscheme)}
         """
         result = sqlitehandler.queryDatabase(query)
         if result:
