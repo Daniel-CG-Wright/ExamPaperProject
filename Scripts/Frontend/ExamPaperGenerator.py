@@ -14,6 +14,7 @@ import os
 import subprocess
 import shutil
 from .ImagesViewHandler import ImagesViewHandler
+from .Util.imageClass import AreImagesAvailable
 # handles the generation of random questions
 
 
@@ -463,6 +464,12 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
         # output marks
         self.lMarksOutput.setText(
             f"Total marks: {self.TotalMarks}")
+        # if no images then disable the images button
+        # else enable it
+        if AreImagesAvailable(selectedQuestionIDs):
+            self.pbShowImages.setEnabled(True)
+        else:
+            self.pbShowImages.setEnabled(False)
 
     def GetQuestionCriteria(self) -> CriteriaStruct:
         """

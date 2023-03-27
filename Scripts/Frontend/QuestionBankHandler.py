@@ -11,6 +11,7 @@ from .AddEditWindowHandler import AddEditWindowHandler
 from .AlertWindowHandler import AlertWindow
 from .ConfirmWindowHandler import ConfirmWindow
 from .ImagesViewHandler import ImagesViewHandler
+from .Util.imageClass import AreImagesAvailable
 # handles the generation of random questions
 
 
@@ -160,6 +161,11 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
             )
         self.teQuestionPreview.clear()
         self.teQuestionPreview.setText(questiontext)
+        # disable pbViewImages if no images
+        if not AreImagesAvailable([questionid]):
+            self.pbViewImages.setEnabled(False)
+        else:
+            self.pbViewImages.setEnabled(True)
 
     def OutputNoEntriesMessage(self, tablePointer: QTableWidget):
         """"

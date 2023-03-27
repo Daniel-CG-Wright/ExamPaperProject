@@ -8,6 +8,16 @@ except ImportError:
     # suggested by Oscar
     print("Attempting to install missing module PyQT5")
     call("pip3 install PyQt5")
+    from PyQt5.QtWidgets import QApplication
+
+try:
+    import docx
+except ImportError:
+    # suggested by Oscar
+    print("Attempting to install missing module docx")
+    call("pip3 install python-docx")
+    import docx
+
 import sys
 
 

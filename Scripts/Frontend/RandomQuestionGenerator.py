@@ -8,6 +8,7 @@ from typing import List, Set
 from .OutputWindowHandler import OutputWindowHandler
 from random import randint
 from .ImagesViewHandler import ImagesViewHandler
+from .Util.imageClass import AreImagesAvailable
 # handles the generation of random questions
 
 
@@ -27,6 +28,8 @@ class RandomQuestionHandler(Ui_RandomQuestionWindow, QMainWindow):
         # question pool is for all the potential random
         # question ids that can be picked.
         self.currentQuestionPool: List[str] = []
+        # disable show images button
+        self.pbShowImagesForQuestion.setEnabled(False)
         self.SetupInputWidgets()
         self.ConnectSignalSlots()
         self.GenerateQuestionPool()
@@ -70,6 +73,10 @@ class RandomQuestionHandler(Ui_RandomQuestionWindow, QMainWindow):
         """
         Generates a random question from the question pool.
         """
+        # shouldnt occur but if there are no questions we cannot proceed
+        if len(self.currentQuestionPool) == 0:
+            return
+        # getting question id
         question = self.currentQuestionPool.pop(
             randint(0, len(self.currentQuestionPool)-1))
         self.currentQuestionID = question
@@ -78,6 +85,13 @@ class RandomQuestionHandler(Ui_RandomQuestionWindow, QMainWindow):
         self.lNumberOfUniques.setText(
             f"Number of unique questions left: {len(self.currentQuestionPool)}"
         )
+        # if there are no images disable show images button
+        # otherwise enable it
+        if AreImagesAvailable([question]):
+            self.pbShowImagesForQuestion.setEnabled(True)
+        else:
+            self.pbShowImagesForQuestion.setEnabled(False)
+
         if len(self.currentQuestionPool) == 0:
             # generate question pool again for later
             self.GenerateQuestionPool()
