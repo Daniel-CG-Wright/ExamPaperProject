@@ -82,9 +82,9 @@ WHERE QuestionID = '{self.editQuestionID}'
         for part in partsresults:
             partobj = Part(
                 None,
-                partsresults[2],
-                partsresults[1],
-                partsresults[0]
+                part[2],
+                part[1],
+                part[0]
             )
             self.parts.append(partobj)
         # update the parts table
@@ -121,6 +121,8 @@ WHERE QuestionID = '{self.editQuestionID}'
         self.pbDeleteImage.clicked.connect(self.DeleteImage)
         self.lwImages.currentRowChanged.connect(self.SelectImagePreview)
         self.pbAddTopics.clicked.connect(self.PressAddTopics)
+        self.checkBoxIsMarkscheme.stateChanged.connect(
+            self.OnCheckMarkschemeOnly)
 
     def UpdateImagesList(self):
         """
@@ -278,16 +280,17 @@ WHERE QuestionID = '{self.editQuestionID}'
             options=QFileDialogOptions
         )
         if fileName:
+            readableFileName = Path(fileName).name
+            extension = Path(fileName).suffix.upper()[1:]
             pixmap = QPixmap()
-            worked = pixmap.load(fileName)
+            worked = pixmap.load(fileName, extension)
             if not worked:
                 AlertWindow(f"Error loading image from {fileName}")
                 return
             else:
                 # get name of file from path
-                fileName = Path(fileName).name
-                extension = Path(fileName).suffix
-                self.images.append(Image(fileName, pixmap, format=extension))
+                self.images.append(Image(readableFileName, pixmap,
+                                         format=extension))
                 self.lwImages.addItem(fileName)
                 self.lwImages.setCurrentRow(len(self.images) - 1)
                 # preview is run when current row is changed
@@ -437,7 +440,7 @@ WHERE QuestionID = '{self.editQuestionID}'
             buffer = QBuffer(arrayOfBytes)
             buffer.open(QIODevice.WriteOnly)
             try:
-                image.pixmap.toImage().save(buffer, image.format)
+                image.pixmap.save(buffer, image.format)
             except Exception as e:
                 AlertWindow(f"Error saving image {image.name}: {e}")
                 continue

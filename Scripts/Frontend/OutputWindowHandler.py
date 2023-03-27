@@ -18,7 +18,7 @@ class OutputWindowHandler(Ui_TextDialog, QMainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowModality(Qt.WindowModality.NonModal)
-        self.ConnectSignalSlots(self)
+        self.ConnectSignalSlots()
         self.lMarkschemeNotice.setText(labelText)
         self.textEdit.setText(outputText)
         if questionids:

@@ -142,7 +142,8 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
                 self.records[selectedrowindex][1]
                 }"""
 
-        output = OutputWindowHandler(labeltext, mstext, self)
+        output = OutputWindowHandler(labeltext, mstext, [questionid],
+                                     parent=self)
 
     def OnQuestionSelected(self):
         """
@@ -392,7 +393,6 @@ WHERE
     Paper.PaperLevel,
     Question.QuestionNumber
         """
-        print(questionquery)
         self.records = self.SQLsocket.queryDatabase(questionquery)
 
     def SetupInputWidgets(self):
