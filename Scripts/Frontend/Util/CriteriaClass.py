@@ -6,53 +6,72 @@ from typing import Dict
 # is "stock control system" then it will not be matched
 TOPICKEYWORDS: Dict[str, str] = {
     "Databases": ["database", "Entity-Relationship Diagram", "ERD"],
+    "Software types":
+    ["bespoke", "off-the-shelf", "open source", "proprietary"],
     "Contingencies":
     ["contingency", "recovery", "backup"],
     "Operating Systems - buffering, interrupts, polling":
     ["buffering", "polling", "interrupt",
         "buffer", "time slicing", "partitioning", "scheduling"],
     "Operating systems - Modes of operation":
-    ["Batch processing", "Real time transaction", "Real time control"],
+    ["Batch processing", "Real time transaction", "Real time control",
+     "mode of operation"],
     "Operating systems - UI, types":
     ["User Interface", "Command Line Interface", "multi-user",
      "multi-processing", "standalone user", "multi-tasking",
      "batch operating system"],
     "Operating systems - resource management":
-    ["Utility software", "resource management"],
+    ["Utility software", "resource management", "defragmentation",
+     "fragmented", "file attributes", "hierarchical"],
     "Files":
     ["direct access file", "hash file", "transaction file",
      "master file", "serial file", "sequential file", "fixed length",
-     "variable length", "hashing"],
+     "variable length", "hashing", "multi-level index", "multi-level indexes",
+     "multi level index", "multi level indexes", "file attributes",
+     "random access file",
+     "random access files", "indexed sequential file",
+     "indexed sequential files"],
     "Networking":
     ["collision", "Dijkstra",
      "simplex", "duplex", "switch", "router", "network", "LAN", "WAN",
-     "internet", "multiplexing", "transmission"],
+     "internet", "multiplexing", "transmission", "protocols", "handshaking",
+     "shortest path"],
     "Security":
     ["Biometric", "Encryption", "Malware", "malicious software", "security",
-     "validation"],
+     "validation", "cryptography", "threats"],
     "Algorithms":
-    ["an algorithm", "passing by reference", "passing by value"],
+    ["passing by reference", "passing by value",
+     "quicksort", "bubble sort", "insertion sort", "write an algorithm",
+     "procedure", "pseudocode", "psuedo-code", "iteration", "recursion",
+     "programming constructs"],
     "Big O":
     ["Big O", "Time complexity"],
     "Systems":
-    ["Safety critical", "weather forecasting",
-     "robotics", "CAD", "Computer Aided Design"],
+    ["Safety critical", "forecasting", "forecast"
+     "robotics", "CAD", "Computer Aided Design", "expert system",
+     "expert systems"],
     "Computer architecture":
-    ["von neumann", "cache", "control unit"],
+    ["von neumann", "cache", "control unit", "fetch-execute",
+     "fetch-decode-execute"],
+    "Secondary storage devices":
+    ["magnetic disk", "magnetic tape", "optical disk", "optical tape",
+     "hdd", "ssd", "optical drive"],
     "Assembly language":
     ["Assembly language"],
     "SQL":
     ["SQL"],
-    "Data structures":
+    "Data structures and types":
     ["stack", "queue", "linked list", "two-dimensional array",
-     "binary tree"],
+     "binary tree", "data type", "data types", "data structure"],
     "Binary":
     ["floating point", "fixed point", "two's complement", "binary",
-     "masking", "truncation", "rounding"],
+     "masking", "truncation", "rounding", "two's complementation"],
     "Processing":
     ["parallel processing", "distributed processing", "data mining"],
     "Code of conduct and legislation and ethics":
-    ["code of conduct", "legislation", "ethic"],
+    ["code of conduct", "legislation", "ethics", "ethical",
+     "data protection act", "data protection",
+     "computer misuse act", "computer misuse", "protects data"],
     "HCI":
     ["HCI", "interface", "voice input"],
     "Boolean algebra":
@@ -67,7 +86,7 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["version control", "IDE", "debugging"],
     "Analysis and design":
     ["waterfall", "agile", "analysis", "feasibility", "investigate",
-     "investigation", "changeover"],
+     "investigation", "changeover", "design review", "evaluation"],
     "Backus-Naur":
     ["Backus-Naur", "BNF"],
     "Testing":
