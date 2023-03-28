@@ -373,6 +373,16 @@ WHERE QuestionID = '{self.editQuestionID}'
         # if we are in edit mode then update the question
         # otherwise insert a new question
         if self.editQuestionID:
+            # first check if question id exists
+            # if not output error and return
+            sqlquery = f"""
+            SELECT COUNT(QuestionID) FROM Question
+            WHERE QuestionID = '{self.editQuestionID}'
+            """
+            result: int = self.SQLSocket.queryDatabase(sqlquery)[0][0]
+            if not result:
+                AlertWindow("Question does not exist")
+                return
             # update question data
             sqlquery = f"""
             UPDATE Question SET
@@ -403,8 +413,11 @@ WHERE QuestionID = '{self.editQuestionID}'
             self.AddTopicsToSQL(self.editQuestionID)
 
         else:
-            # new question id
-            questionid = f"{paperid}{self.sbQNumber.value()}"
+            # new question id from max question id
+            sqlquery = f"""
+            SELECT IFNULL(MAX(QuestionID), 0) FROM Question
+            """
+            questionid: int = self.SQLSocket.queryDatabase(sqlquery)[0][0] + 1
             # insert question data
             sqlquery = f"""
             INSERT INTO Question (QuestionID, QuestionNumber,
@@ -465,7 +478,11 @@ WHERE QuestionID = '{self.editQuestionID}'
         Add parts to the SQL database
         """
         for part in self.parts:
-            partid = f"{questionid}{part.section}"
+            # get the next part id
+            partidquery = f"""
+            SELECT IFNULL(MAX(PartiD), 0) FROM Parts
+            """
+            partid = self.SQLSocket.queryDatabase(partidquery)[0][0] + 1
             sqlquery = f"""
             INSERT INTO Parts (PartiD, QuestionID,
             PartNumber, PartMarks, PartContents)
@@ -499,7 +516,11 @@ WHERE QuestionID = '{self.editQuestionID}'
         self.SQLSocket.addToDatabase(sqlquery)
         # add all topics
         for topic in self.topics:
-            questiontopicid = questionid + topic
+            # get next question topic id
+            query = f"""
+            SELECT IFNULL(MAX(QuestionTopicID), 0) FROM QuestionTopic
+            """
+            questiontopicid = self.SQLSocket.queryDatabase(query)[0][0] + 1
             sqlquery = f"""
             INSERT INTO QuestionTopic (QuestionTopicID, QuestionID, TopicID)
             VALUES ('{questiontopicid}', '{questionid}', '{topic}')

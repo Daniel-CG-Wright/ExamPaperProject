@@ -36,7 +36,10 @@ def main():
             except KeyError:
                 mstext = ""
 
-            questionid = paperid + str(questionobj.number)
+            # get the next max question id
+            questionidquery = f"""
+            SELECT IFNULL(MAX(QuestionID), 0) FROM QUESTION"""
+            questionid = sqlsocket.queryDatabase(questionidquery)[0][0] + 1
             totalmarks = questionobj.marks + sum(
                 i.marks for i in questionobj.parts)
             mstext = mstext.replace("\n", r"\n").replace("'", r"''")
@@ -53,9 +56,15 @@ def main():
             """
             sqlsocket.addToDatabase(questioninsert)
             for topic in questionobj.topics:
+                # get next questiontopic id
+                questiontopicid = f"""
+                SELECT IFNULL(MAX(QuestionTopicID), 0) FROM QUESTIONTOPIC
+                """
+                questiontopicid = sqlsocket.queryDatabase(
+                    questiontopicid)[0][0] + 1
                 topicquery = f"""
                 INSERT INTO QUESTIONTOPIC VALUES(
-                '{questionid + topic}',
+                '{questiontopicid}',
                 '{questionid}',
                 '{topic}'
                 )
@@ -64,7 +73,10 @@ def main():
             for part in questionobj.parts:
                 if part.marks == 0:
                     continue
-                partid = questionid + part.section
+                # get next part id
+                partidquery = f"""
+                SELECT IFNULL(MAX(PartID), 0) FROM PARTS"""
+                partid = sqlsocket.queryDatabase(partidquery)[0][0] + 1
                 try:
                     msobj = markschemeparser.answerindex[part.section]
                     mstext = msobj.contents

@@ -51,7 +51,7 @@ class SQLiteHandler:
             """,
             """
             CREATE TABLE QUESTION(
-  QuestionID VARCHAR(50) PRIMARY KEY NOT NULL,
+  QuestionID INTEGER PRIMARY KEY NOT NULL,
   PaperID VARCHAR(40),
   QuestionNumber INTEGER,
   QuestionContents TEXT,
@@ -63,7 +63,7 @@ class SQLiteHandler:
             """
             CREATE TABLE IMAGES(
   ImageID INTEGER PRIMARY KEY NOT NULL,
-  QuestionID VARCHAR(50),
+  QuestionID INTEGER,
   ImageName TEXT,
   ImageData BLOB,
   ImageFormat VARCHAR(10),
@@ -73,8 +73,8 @@ class SQLiteHandler:
             """,
             """
             CREATE TABLE PARTS(
-  PartID VARCHAR(60) PRIMARY KEY NOT NULL,
-  QuestionID VARCHAR(50),
+  PartID INTEGER PRIMARY KEY NOT NULL,
+  QuestionID INTEGER,
   PartNumber VARCHAR(10),
   PartContents TEXT,
   PartMarks INTEGER,
@@ -84,8 +84,8 @@ class SQLiteHandler:
             """,
             """
             CREATE TABLE QUESTIONTOPIC(
-  QuestionTopicID VARCHAR(150),
-  QuestionID VARCHAR(50),
+  QuestionTopicID INTEGER PRIMARY KEY NOT NULL,
+  QuestionID INTEGER,
   TopicID VARCHAR(100)
 );
             """,
@@ -166,4 +166,4 @@ class SQLiteHandler:
 
 if __name__ == "__main__":
     sqlsocket = SQLiteHandler()
-    # sqlsocket.Reset()
+    sqlsocket.Reset()
