@@ -1,6 +1,16 @@
 import sqlite3
 import genanki
-class Anki_card_model:
+import re
+from typing import List
+import re
+from typing import List
+from sqlitehandler import *
+from Frontend.Util.QuestionPartFunctionHelpers import *
+
+
+
+
+class Anki_card_model: #defining a model for a single card
     def __init__(self):
         self.my_model = genanki.Model(
         1607392319,
@@ -23,15 +33,20 @@ class Anki_converter(Anki_card_model):
         self.name = name
         self.my_deck = genanki.Deck(2059400110, self.name)
 
-    def add_cards(self):
-        front_list = [] # put all of the questions here
-        back_list = [] #put all of the question numbers and from which paper
+    def add_cards(self, questions):
+        front_list =  questions# put all of the questions here
+        #back_list = [] #put all of the question numbers and from which paper
         print(self.db_path)
         print(len(front_list))
-        for i in range(0,10):
+        sqlitesocket = SQLiteHandler()
+        z = [i[0] for i in sqlitesocket.queryDatabase("SELECT QuestionID FROM QUESTION")]
+        for i in range(0,len(front_list)-1):
+            ret = GetFullMarkscheme(sqlitesocket,  z[i])
+            question = '{}'.format(ret)
+            string = "{}".format(front_list[i])
             my_note = genanki.Note(
             model=self.my_model,
-            fields=[front_list[i], back_list[i]])
+            fields=[string, question])
             self.my_deck.add_note(my_note)
     def create_deck(self):
         genanki.Package(self.my_deck).write_to_file(self.name)
@@ -40,7 +55,6 @@ class Anki_converter(Anki_card_model):
 
 if __name__ == '__main__':
     model = Anki_card_model()
-    start = Anki_converter('database.sqlite', 'deck.apkg')
-    start.add_cards()
+    start = Anki_converter('Database/ExamQuestions.db', 'CS 2017-2021.apkg')
+    start.add_cards(GetAllQuestionsAndParts(SQLiteHandler()))
     start.create_deck()
-

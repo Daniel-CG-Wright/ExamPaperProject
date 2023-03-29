@@ -3,6 +3,11 @@ Top edit is the search bar. Search the contents of questions and their sub-parts
 You can select questions only from sepcific components or levels, or from a specific topic.
 You can filter by min and max marks for the entire question (all parts included).
 
+Adding questions:
+Fields should be self explanatory, the main question text is what shows before any parts are displayed.
+Images must be an image file, if marked as markscheme only they will only show up in the markscheme
+otherwise they will show up in the question (for diagrams etc).
+
 Random question generator:
 Add topics to the table. Any of the topics in the table can be generated.
 No topics selected = all topics allowed.

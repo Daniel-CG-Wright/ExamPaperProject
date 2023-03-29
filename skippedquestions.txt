@@ -29,3 +29,5 @@ Assembly language
 
 2021 Component 2 - Q11
 Download speeds and encryption (?)
+
+Binary and boolean algebra are skipped in general
