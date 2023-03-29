@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from .Generated.ExamPaperGenerated import Ui_PaperGenerator
 from .Util.QuestionPartFunctionHelpers import (GetQuestionAndParts,
                                                GetFullMarkscheme)
-from .Util.CriteriaClass import CriteriaStruct
+from .Util.CriteriaClass import (CriteriaStruct, TOPICS,
+                                 COMPONENT1TOPICS, COMPONENT2TOPICS)
 from docx import Document
 from docx.shared import Pt
 from sqlitehandler import SQLiteHandler
@@ -142,7 +143,8 @@ class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
         output = OutputWindowHandler(
             "Markscheme for generated paper",
             mstext,
-            self
+            self.currentQuestionIDs,
+            parent=self
         )
 
     def SaveMarkschemeText(self):
@@ -317,14 +319,22 @@ class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
         criteria = self.GetQuestionCriteria()
         # we will get all the topics for the component selected
         # using an SQL query.
-        componentquery = ""
+        availabletopics = []
         if not criteria.component:
-            componentquery = f"""
-            (Paper.PaperComponent = 'component 1'
-            OR Paper.PaperComponent = 'component 2')
-            """
+            # for if no component is selected
+            # componentquery = f"""
+            # (Paper.PaperComponent = 'component 1'
+            # OR Paper.PaperComponent = 'component 2')
+            # """
+            # we use a *2 to duplicate all the topics
+            # so that there is enough content.
+            availabletopics = TOPICS.copy() * 2
         else:
-            componentquery = f"Paper.PaperComponent = '{criteria.component}'"
+            # componentquery = f"Paper.PaperComponent = '{criteria.component}'"
+            if criteria.component == "component 1":
+                availabletopics = COMPONENT1TOPICS.copy() * 2
+            else:
+                availabletopics = COMPONENT2TOPICS.copy() * 2
 
         levelquery = ""
         if not criteria.level:
@@ -335,17 +345,6 @@ class ExamPaperHandler(Ui_PaperGenerator, QMainWindow):
         else:
             levelquery = f"Paper.PaperLevel = '{criteria.level}'"
 
-        getTopicsQuery = f"""
-        SELECT DISTINCT(QuestionTopic.TopicID)
-FROM QuestionTopic
-JOIN Question ON QuestionTopic.QuestionID = Question.QUestionID
-JOIN Paper ON Question.PaperID = Paper.PaperID
-WHERE {componentquery}
-AND {levelquery}
-        """
-        topicsdata = self.SQLSocket.queryDatabase(getTopicsQuery)
-        # all the topics to choose from.
-        availabletopics = list([i[0] for i in topicsdata])
         currentMarks: int = 0
         # store the selected question IDs for use in the paper
         selectedQuestionIDs: List[str] = []
@@ -357,13 +356,15 @@ AND {levelquery}
 FROM QUESTION
 JOIN QUESTIONTOPIC ON Question.QuestionID = QUESTIONTOPIC.QuestionID
 WHERE QuestionTopic.TopicID IN
-(SELECT DISTINCT(QuestionTopic.TopicID)
-FROM QuestionTopic
-JOIN Question ON QuestionTopic.QuestionID = Question.QUestionID
-JOIN Paper ON Question.PaperID = Paper.PaperID
-WHERE {componentquery}
-AND {levelquery})
+({','.join([f"'{i}'" for i in availabletopics])})
 AND Question.TotalMarks >= {self.MINLONGMARKS}
+AND Question.QuestionID IN (SELECT Question.QuestionID FROM
+            QUESTION, Parts WHERE NOT EXISTS(
+                SELECT Parts.QuestionID FROM Parts
+                WHERE Question.QuestionID = Parts.QuestionID)
+                )
+AND QUESTION.PaperID IN (SELECT Paper.PaperID FROM Paper
+WHERE {levelquery.upper()})
     """
         longanswers = self.SQLSocket.queryDatabase(longanswerquery)
         availablelonganswers = list([i[0] for i in longanswers])
@@ -371,7 +372,7 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
             randint(0, len(availablelonganswers)-1)]
         longanswermarks = f"""
         SELECT TotalMarks FROM Question
-        WHERE QuestionID = '{longanswerquestionid}'
+        WHERE QuestionID = {longanswerquestionid}
         """
         longanswermarks = self.SQLSocket.queryDatabase(longanswermarks)[
             0][0]
@@ -392,7 +393,10 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
             # this query gets all the possible question ids
             availablequestionsidsquery = f"""
             SELECT QuestionID FROM QuestionTopic WHERE
-            TopicID = '{chosentopic}'
+            TopicID = '{chosentopic}' AND QuestionID IN
+            (SELECT Question.QuestionID FROM QUESTION
+            WHERE QUESTION.PaperID IN (SELECT paper.PaperID FROM
+            Paper WHERE {levelquery.upper()}))
             """
             # get the results as a set
             availablequestionids = set(
@@ -416,7 +420,7 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
                     continue
                 marksquery = f"""
                 SELECT TotalMarks FROM Question
-                WHERE QuestionID = '{selectedid}'
+                WHERE QuestionID = {selectedid}
                 """
                 marks = self.SQLSocket.queryDatabase(marksquery)[0][0]
                 if currentMarks + marks > criteria.maxmarks:
@@ -487,10 +491,10 @@ AND Question.TotalMarks >= {self.MINLONGMARKS}
         # in the SQL query
         component = ""
         if self.cbComponent.currentIndex() != 0:
-            component = self.cbComponent.currentText()
+            component = self.cbComponent.currentText().lower()
         level = ""
         if self.cbLevel.currentIndex() != 0:
-            level = self.cbLevel.currentText()
+            level = self.cbLevel.currentText().lower()
 
         return CriteriaStruct(
             set(),

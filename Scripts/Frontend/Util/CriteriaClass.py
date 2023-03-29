@@ -9,7 +9,7 @@ TOPICKEYWORDS: Dict[str, str] = {
     "Software types":
     ["bespoke", "off-the-shelf", "open source", "proprietary"],
     "Contingencies":
-    ["contingency", "recovery", "backup"],
+    ["contingency", "recovery", "backup", "backing up"],
     "Operating Systems - buffering, interrupts, polling":
     ["buffering", "polling", "interrupt",
         "buffer", "time slicing", "partitioning", "scheduling"],
@@ -19,7 +19,7 @@ TOPICKEYWORDS: Dict[str, str] = {
     "Operating systems - UI, types":
     ["User Interface", "Command Line Interface", "multi-user",
      "multi-processing", "standalone user", "multi-tasking",
-     "batch operating system"],
+     "batch operating system", "multitasking", "multiprogramming"],
     "Operating systems - resource management":
     ["Utility software", "resource management", "defragmentation",
      "fragmented", "file attributes", "hierarchical"],
@@ -35,15 +35,16 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["collision", "Dijkstra",
      "simplex", "duplex", "switch", "router", "network", "LAN", "WAN",
      "internet", "multiplexing", "transmission", "protocols", "handshaking",
-     "shortest path"],
+     "shortest path", "contemporary uses"],
     "Security":
     ["Biometric", "Encryption", "Malware", "malicious software", "security",
-     "validation", "cryptography", "threats"],
+     "cryptography", "threats", "cyber attack", "cyber-attacks", "phishing",
+     "penetration testing", "penetration test", "penetration tests"],
     "Algorithms":
-    ["passing by reference", "passing by value",
+    ["by reference", "by value",
      "quicksort", "bubble sort", "insertion sort", "write an algorithm",
      "procedure", "pseudocode", "psuedo-code", "iteration", "recursion",
-     "programming constructs"],
+     "programming constructs", "flowchart"],
     "Big O":
     ["Big O", "Time complexity"],
     "Systems":
@@ -52,10 +53,10 @@ TOPICKEYWORDS: Dict[str, str] = {
      "expert systems"],
     "Computer architecture":
     ["von neumann", "cache", "control unit", "fetch-execute",
-     "fetch-decode-execute"],
+     "fetch-decode-execute", "CPU architecture"],
     "Secondary storage devices":
     ["magnetic disk", "magnetic tape", "optical disk", "optical tape",
-     "hdd", "ssd", "optical drive"],
+     "hdd", "ssd", "optical drive", "secondary storage"],
     "Assembly language":
     ["Assembly language"],
     "SQL":
@@ -66,7 +67,7 @@ TOPICKEYWORDS: Dict[str, str] = {
     "Binary":
     ["floating point", "fixed point", "two's complement", "binary",
      "masking", "truncation", "rounding", "two's complementation"],
-    "Processing":
+    "Parallel/distributed processing":
     ["parallel processing", "distributed processing", "data mining"],
     "Code of conduct and legislation and ethics":
     ["code of conduct", "legislation", "ethics", "ethical",
@@ -79,9 +80,11 @@ TOPICKEYWORDS: Dict[str, str] = {
     "Compression":
     ["compression"],
     "Paradigms":
-    ["object", "class", "OOP", "procedural", "paradigm", "languages"],
+    ["object", "class", "OOP", "procedural", "paradigm", "languages",
+     "programming construct", "programming constructs", "paradigms"],
     "Translation":
-    ["Compiler", "interpreter", "assembler", "translation", "compilation"],
+    ["Compiler", "interpreter", "assembler", "translation", "compilation",
+     "compilers", "interpreters", "assemblers"],
     "Software for development":
     ["version control", "IDE", "debugging"],
     "Analysis and design":
@@ -95,6 +98,31 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["Maintenance documentation"]
 
 }
+
+TOPICS = list(TOPICKEYWORDS.keys())
+TOPICS.sort()
+
+COMPONENT1TOPICS = [
+    "Data structures and types",
+    "Algorithms",
+    "Paradigms",
+    "Analysis and design",
+    "Maintenance documentation",
+    "HCI",
+    "Software for development",
+    "Translation",
+    "Boolean Algebra",
+    "Code of conduct and legislation and ethics",
+    "Backus-Naur",
+    "Compression",
+    "Contingencies"
+]
+
+COMPONENT2TOPICS = [
+    "Algorithms",
+    "Contingencies"
+]
+COMPONENT2TOPICS.extend((i for i in TOPICS if i not in COMPONENT1TOPICS))
 
 
 class CriteriaStruct:

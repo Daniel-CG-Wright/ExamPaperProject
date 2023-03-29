@@ -2,7 +2,7 @@
 from PyQt5.QtWidgets import QDialog
 from .Generated.TopicsWindowGenerated import Ui_TopicsDialog
 from typing import List, Set
-from .Util.CriteriaClass import TOPICKEYWORDS
+from .Util.CriteriaClass import TOPICS
 
 
 class TopicsWindowHandler(Ui_TopicsDialog, QDialog):
@@ -10,8 +10,8 @@ class TopicsWindowHandler(Ui_TopicsDialog, QDialog):
         super().__init__(parent)
         self.setupUi(self)
         self.ConnectSignalSlots()
-        self.topics = currentTopics if currentTopics else []
-        self.finalTopics = currentTopics if currentTopics else []
+        self.topics = currentTopics
+        self.finalTopics = currentTopics
         self.UpdateTopicList()
 
         self.show()
@@ -52,12 +52,6 @@ class TopicsWindowHandler(Ui_TopicsDialog, QDialog):
         self.lwTopics.addItems(self.topics)
         self.RefreshTopicComboBox()
 
-    def GetAllAvailableTopics(self) -> List[str]:
-        """
-        Gets all available topics
-        """
-        return list(TOPICKEYWORDS.keys())
-
     def RefreshTopicComboBox(self):
         """
         Refreshes the topic combobox
@@ -65,7 +59,7 @@ class TopicsWindowHandler(Ui_TopicsDialog, QDialog):
         self.cbTopicSelect.clear()
         # get topics which are not selected
         topicsToAdd = [
-            i for i in self.GetAllAvailableTopics() if i not in self.topics]
+            i for i in TOPICS if i not in self.topics]
         self.cbTopicSelect.addItems(["Select a topic"] + topicsToAdd)
 
     def Accept(self):

@@ -249,6 +249,7 @@ WHERE
         self.AddRowToTopics()
         self.pbConfirmReset.setEnabled(False)
         self.pbResetTopics.setText("Reset Topics")
+        self.selectedTopics = set()
         # update pool
         self.GenerateQuestionPool()
 
@@ -325,11 +326,12 @@ FROM
     Question q
 INNER JOIN
     Paper p ON q.PaperID = p.PaperID
-    AND q.QuestionID = '{self.currentQuestionID}';
+    AND q.QuestionID = {self.currentQuestionID};
         """
         data = self.SQLSocket.queryDatabase(dataquery)[0]
         labeltext = f"Question {data[1]} from paper {data[0]}"
-        output = OutputWindowHandler(labeltext, mstext, self)
+        output = OutputWindowHandler(labeltext, mstext,
+                                     [self.currentQuestionID], parent=self)
 
     def GetQuestionCriteria(self) -> CriteriaStruct:
         """

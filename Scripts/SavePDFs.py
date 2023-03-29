@@ -46,7 +46,7 @@ def main():
             # first add the question itself
             questioninsert = f"""
             INSERT INTO QUESTION VALUES(
-            '{questionid}',
+            {questionid},
             '{paperid}',
             {questionobj.number},
             '{questionobj.contents}',
@@ -64,8 +64,8 @@ def main():
                     questiontopicid)[0][0] + 1
                 topicquery = f"""
                 INSERT INTO QUESTIONTOPIC VALUES(
-                '{questiontopicid}',
-                '{questionid}',
+                {questiontopicid},
+                {questionid},
                 '{topic}'
                 )
                 """
@@ -89,8 +89,8 @@ def main():
                     continue
                 partinsert = f"""
                 INSERT INTO PARTS VALUES(
-                '{partid}',
-                '{questionid}',
+                {partid},
+                {questionid},
                 '{part.section}',
                 '{part.contents.strip()}',
                 {part.marks},

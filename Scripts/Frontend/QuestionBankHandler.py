@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QTableWidget
 from .Generated.QuestionBankGenerated import Ui_ViewAllQuestions
 from PyQt5.QtCore import Qt
 from sqlitehandler import SQLiteHandler
-from .Util.CriteriaClass import CriteriaStruct, TOPICKEYWORDS
+from .Util.CriteriaClass import CriteriaStruct, TOPICS
 from typing import List, Tuple
 import re
 from .Util import QuestionPartFunctionHelpers as funchelpers
@@ -72,22 +72,22 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
             selectedrowindex = self.twQuestionBank.currentRow()
             questionid = self.records[selectedrowindex][0]
             deletequery = f"""
-            DELETE FROM Question WHERE QuestionID = '{questionid}'
+            DELETE FROM Question WHERE QuestionID = {questionid}
             """
             self.SQLsocket.addToDatabase(deletequery)
             # delete parts
             deletequery = f"""
-            DELETE FROM Parts WHERE QuestionID = '{questionid}'
+            DELETE FROM Parts WHERE QuestionID = {questionid}
             """
             self.SQLsocket.addToDatabase(deletequery)
             # delete images
             deletequery = f"""
-            DELETE FROM Images WHERE QuestionID = '{questionid}'
+            DELETE FROM Images WHERE QuestionID = {questionid}
             """
             self.SQLsocket.addToDatabase(deletequery)
             # delete topics
             deletequery = f"""
-            DELETE FROM QuestionTopic WHERE QuestionID = '{questionid}'
+            DELETE FROM QuestionTopic WHERE QuestionID = {questionid}
             """
             self.SQLsocket.addToDatabase(deletequery)
             # show success message
@@ -189,7 +189,7 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         partsquery = f"""
         SELECT PartNumber, PartContents, PartMarks
         FROM Parts
-        WHERE QuestionID = '{questionid}'
+        WHERE QuestionID = {questionid}
         """
         partsdata = self.SQLsocket.queryDatabase(partsquery)
         self.twParts.clear()
@@ -351,6 +351,7 @@ WHERE
             """)
 
         if Criteria.contentsearch:
+            Criteria.contentsearch = Criteria.contentsearch.replace("'", "''")
             # get the search criteria
             conditions.append(f"""
             (Question.QuestionContents LIKE '%{Criteria.contentsearch}%' OR
@@ -405,7 +406,7 @@ WHERE
         """
         Sets up the input widgets as needed. For open use only
         """
-        topics = TOPICKEYWORDS.keys()
+        topics = TOPICS
         self.cbSelectTopic.clear()
         self.cbSelectTopic.addItem("All topics")
         self.cbSelectTopic.addItems(topics)

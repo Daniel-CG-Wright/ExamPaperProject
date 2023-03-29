@@ -30,7 +30,7 @@ def AreImagesAvailable(questionids: List[str], isMarkscheme=False) -> bool:
         sqlitehandler = SQLiteHandler()
         query = f"""
         SELECT * FROM Images
-        WHERE QuestionID = '{questionid}'
+        WHERE QuestionID = {questionid}
         AND IsPartOfMarkscheme = {int(isMarkscheme)}
         """
         result = sqlitehandler.queryDatabase(query)

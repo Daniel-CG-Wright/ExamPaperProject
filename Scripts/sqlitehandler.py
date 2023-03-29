@@ -166,4 +166,4 @@ class SQLiteHandler:
 
 if __name__ == "__main__":
     sqlsocket = SQLiteHandler()
-    sqlsocket.Reset()
+    # sqlsocket.Reset()

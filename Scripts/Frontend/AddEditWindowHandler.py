@@ -11,6 +11,7 @@ from .AlertWindowHandler import AlertWindow
 from pathlib import Path
 from sqlitehandler import SQLiteHandler
 from .TopicsWindowHandler import TopicsWindowHandler
+from .Util.QuestionPartFunctionHelpers import GetFullMarkscheme
 
 
 class AddEditWindowHandler(Ui_AddEditQuestions, QDialog):
@@ -44,7 +45,7 @@ SELECT Paper.PaperComponent, Paper.PaperLevel, Paper.PaperYear,
        Question.QuestionContents, Question.TotalMarks, Question.QuestionNumber
 FROM Question
 INNER JOIN Paper ON Question.PaperID = Paper.PaperID
-WHERE Question.QuestionID = '{self.editQuestionID}'
+WHERE Question.QuestionID = {self.editQuestionID}
         """
         result = self.SQLSocket.queryDatabase(questionquery)
         if result:
@@ -63,11 +64,14 @@ WHERE Question.QuestionID = '{self.editQuestionID}'
         self.sbQNumber.setValue(results[5])
         # disable the question number so that it cannot be edited
         self.sbQNumber.setEnabled(False)
+        # set the markscheme
+        self.teMS.setPlainText(GetFullMarkscheme(
+            self.SQLSocket, self.editQuestionID))
         # set the topics
         topicquery = f"""
 SELECT TopicID
 FROM QuestionTopic
-WHERE QuestionID = '{self.editQuestionID}'
+WHERE QuestionID = {self.editQuestionID}
         """
         topicresults = self.SQLSocket.queryDatabase(topicquery)
         self.topics = [i[0] for i in topicresults]
@@ -76,7 +80,7 @@ WHERE QuestionID = '{self.editQuestionID}'
         partsquery = f"""
         SELECT Parts.PartContents, Parts.PartMarks, Parts.PartNumber
         FROM Parts
-        WHERE Parts.QuestionID = '{self.editQuestionID}'
+        WHERE Parts.QuestionID = {self.editQuestionID}
         """
         partsresults = self.SQLSocket.queryDatabase(partsquery)
         for part in partsresults:
@@ -95,7 +99,7 @@ WHERE QuestionID = '{self.editQuestionID}'
         ImageData, ImageFormat,
         IsPartOfMarkscheme
         FROM IMAGES
-        WHERE QuestionID = '{self.editQuestionID}'
+        WHERE QuestionID = {self.editQuestionID}
         """
         imgresults = self.SQLSocket.queryDatabase(imagequery)
         for img in imgresults:
@@ -377,7 +381,7 @@ WHERE QuestionID = '{self.editQuestionID}'
             # if not output error and return
             sqlquery = f"""
             SELECT COUNT(QuestionID) FROM Question
-            WHERE QuestionID = '{self.editQuestionID}'
+            WHERE QuestionID = {self.editQuestionID}
             """
             result: int = self.SQLSocket.queryDatabase(sqlquery)[0][0]
             if not result:
@@ -390,19 +394,19 @@ WHERE QuestionID = '{self.editQuestionID}'
             QuestionContents = '{self.textEdit.toPlainText()}',
             MarkschemeContents = '{self.teMS.toPlainText()}',
             PaperID = '{paperid}'
-            WHERE QuestionID = '{self.editQuestionID}'
+            WHERE QuestionID = {self.editQuestionID}
             """
             self.SQLSocket.addToDatabase(sqlquery)
             # delete all parts for this question
             sqlquery = f"""
             DELETE FROM PARTS
-            WHERE QuestionID = '{self.editQuestionID}'
+            WHERE QuestionID = {self.editQuestionID}
             """
             self.SQLSocket.addToDatabase(sqlquery)
             # delete all images for this question
             sqlquery = f"""
             DELETE FROM Images
-            WHERE QuestionID = '{self.editQuestionID}'
+            WHERE QuestionID = {self.editQuestionID}
             """
             self.SQLSocket.addToDatabase(sqlquery)
             # add new parts
@@ -423,12 +427,12 @@ WHERE QuestionID = '{self.editQuestionID}'
             INSERT INTO Question (QuestionID, QuestionNumber,
             TotalMarks, QuestionContents, MarkschemeContents,
             PaperID)
-            VALUES ('{questionid}',
+            VALUES ({questionid},
             {self.sbQNumber.value()},
             {self.sbMarks.value()},
             '{self.textEdit.toPlainText()}',
             '{self.teMS.toPlainText()}',
-            '{paperid}')
+            {paperid})
             """
             self.SQLSocket.addToDatabase(sqlquery)
             # add parts
@@ -463,7 +467,7 @@ WHERE QuestionID = '{self.editQuestionID}'
             INSERT INTO Images (ImageID, QuestionID,
             ImageName, ImageData, IsPartOfMarkscheme, imageFormat)
             VALUES ((SELECT MAX(ImageID) FROM Images) + 1,
-            '{questionid}',
+            {questionid},
             '{image.name}',
             ?,
             {int(image.isMarkscheme)},
@@ -486,8 +490,8 @@ WHERE QuestionID = '{self.editQuestionID}'
             sqlquery = f"""
             INSERT INTO Parts (PartiD, QuestionID,
             PartNumber, PartMarks, PartContents)
-            VALUES ('{partid}',
-            '{questionid}',
+            VALUES ({partid},
+            {questionid},
             '{part.section}',
             {part.marks},
             '{part.contents}'
@@ -511,7 +515,7 @@ WHERE QuestionID = '{self.editQuestionID}'
         # delete all topics for this question
         sqlquery = f"""
         DELETE FROM QuestionTopic
-        WHERE QuestionID = '{questionid}'
+        WHERE QuestionID = {questionid}
         """
         self.SQLSocket.addToDatabase(sqlquery)
         # add all topics
@@ -523,6 +527,6 @@ WHERE QuestionID = '{self.editQuestionID}'
             questiontopicid = self.SQLSocket.queryDatabase(query)[0][0] + 1
             sqlquery = f"""
             INSERT INTO QuestionTopic (QuestionTopicID, QuestionID, TopicID)
-            VALUES ('{questiontopicid}', '{questionid}', '{topic}')
+            VALUES ({questiontopicid}, {questionid}, '{topic}')
             """
             self.SQLSocket.addToDatabase(sqlquery)

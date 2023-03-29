@@ -34,7 +34,7 @@ class ImagesViewHandler(Ui_ImagesViewDialog, QDialog):
     FROM Images
     JOIN Question ON Images.questionID = Question.questionID
     JOIN Paper ON Question.paperID = Paper.paperID
-    WHERE question.questionID = '{questionid}'
+    WHERE question.questionID = {questionid}
 """
             if not self.showMarkschemes:
                 imgquery += " AND isPartOfMarkscheme = 0"

@@ -37,7 +37,7 @@ def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str,
     MarkschemeContents
     FROM Question
     WHERE MarkschemeContents IS NOT NULL
-    AND QuestionID = '{questionid}'
+    AND QuestionID = {questionid}
     """
     questionscheme = SQLSocket.queryDatabase(questionquery)
     qnumber = questionscheme[0][0]
@@ -53,7 +53,7 @@ def GetFullMarkscheme(SQLSocket: SQLiteHandler, questionid: str,
     PartNumber,
     MarkschemeContents
     FROM Parts
-    WHERE QuestionID = '{questionid}'
+    WHERE QuestionID = {questionid}
     AND MarkschemeContents IS NOT NULL
     """
     partsschemes = SQLSocket.queryDatabase(partsquery)
@@ -88,7 +88,7 @@ def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str,
     PartContents,
     PartMarks
     FROM Parts
-    WHERE QuestionID = '{questionid}'
+    WHERE QuestionID = {questionid}
     ORDER BY PartNumber
     """
     partsdata = SQLSocket.queryDatabase(partsquery)
@@ -98,7 +98,7 @@ def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str,
     QuestionContents,
     TotalMarks
     FROM Question
-    WHERE QuestionID = '{questionid}'
+    WHERE QuestionID = {questionid}
     """
     questiondata = SQLSocket.queryDatabase(questionquery)[0]
     paperquery = f"""
@@ -107,7 +107,7 @@ def GetQuestionAndParts(SQLSocket: SQLiteHandler, questionid: str,
     '-' || PaperLevel || ' level')
     FROM Paper
     WHERE PaperID = (SELECT PaperID
-    FROM Question WHERE QuestionID = '{questionid}')
+    FROM Question WHERE QuestionID = {questionid})
     """
     paperdata = SQLSocket.queryDatabase(paperquery)
     questionnumber = questiondata[0]
