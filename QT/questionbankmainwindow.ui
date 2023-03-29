@@ -167,6 +167,22 @@
            </widget>
           </item>
           <item>
+           <widget class="QTextEdit" name="teQuestionPreview">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="undoRedoEnabled">
+             <bool>false</bool>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QTableWidget" name="twParts">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -183,22 +199,6 @@
             <attribute name="horizontalHeaderStretchLastSection">
              <bool>true</bool>
             </attribute>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTextEdit" name="teQuestionPreview">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="undoRedoEnabled">
-             <bool>false</bool>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
            </widget>
           </item>
           <item>
