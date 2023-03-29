@@ -1,5 +1,6 @@
 # used to specify common exam question criteria.
 from typing import Dict
+# DO NOT EDIT THESE LISTS
 # Stores a dictionary of each topic and its associated key words
 # put a ! in front of it to avoid classing it for this string
 # e.g. if matching !stock control system then if the only keyword
