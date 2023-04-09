@@ -9,7 +9,7 @@ import re
 class PartHandler(Ui_AddEditParts, QDialog):
 
     def __init__(self, currentSections: List[str],
-                 editPart: Part | None = None, parent=None):
+                 editPart= None, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         self.editPart = editPart
@@ -148,7 +148,7 @@ class PartHandler(Ui_AddEditParts, QDialog):
         self.editPart.contents = self.tePartText.toPlainText()
         self.close()
 
-    def GetPart(self) -> Part | None:
+    def GetPart(self):
         """
         Get the part that was edited/created
         """
