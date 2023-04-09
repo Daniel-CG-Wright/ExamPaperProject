@@ -154,6 +154,9 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         and adding the text in the textedit.
         """
         selectedrowindex = self.twQuestionBank.currentRow()
+        # if -1 then do not go, as this can happen sometimes
+        if selectedrowindex == -1:
+            return
         questionid: str = self.records[selectedrowindex][0]
         self.UpdatePartsTable(questionid)
         questiontext = funchelpers.GetQuestionAndParts(
