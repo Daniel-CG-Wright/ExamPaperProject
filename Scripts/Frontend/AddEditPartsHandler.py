@@ -9,7 +9,7 @@ import re
 class PartHandler(Ui_AddEditParts, QDialog):
 
     def __init__(self, currentSections: List[str],
-                 editPart= None, parent=None):
+                 editPart=None, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         self.editPart = editPart
