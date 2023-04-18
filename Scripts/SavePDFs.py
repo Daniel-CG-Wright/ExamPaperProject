@@ -43,6 +43,7 @@ def main():
             totalmarks = questionobj.marks + sum(
                 i.marks for i in questionobj.parts)
             mstext = mstext.replace("\n", r"\n").replace("'", r"''")
+            questionobj.contents = questionobj.contents.replace("'", r"''")
             # first add the question itself
             questioninsert = f"""
             INSERT INTO QUESTION VALUES(

@@ -2,6 +2,7 @@
 This collated all the exam questions into a database.
 It also provides a UI with some options to help with revision, such as random question generation, exam paper generation
 and a question bank containing all the questions, and allowing them to be filtered.
+This version = 1.2
 
 ## Important
 This program runs a subprocess call to run pip if the required dependencies are not found on the Python environment.
@@ -20,8 +21,9 @@ It also helped me come up with the idea for this program.
 
 - Thank you to Oscar Detnon for the suggestion of placing an automatic pip call to try installing PyQt5 automatically if it could not be found.
 
+- Thank you to Kian for the line to correct for high DPI screens.
 
-## Dependencies:
+## Dependencies (already installed on school PCs):
 - PyQT5
 - python-docx
 

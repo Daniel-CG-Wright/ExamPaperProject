@@ -19,9 +19,12 @@ except ImportError:
     import docx
 
 import sys
+import os
 
 
 if __name__ == "__main__":
+    # to compensate for high DPI screens, thanks Kian
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     app = QApplication(sys.argv)
     win = MainWindowHandler()
     win.show()

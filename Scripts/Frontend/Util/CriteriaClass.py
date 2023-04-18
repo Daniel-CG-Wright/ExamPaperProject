@@ -68,7 +68,10 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["floating point", "fixed point", "two's complement", "binary",
      "masking", "truncation", "rounding", "two's complementation"],
     "Parallel/distributed processing":
-    ["parallel processing", "distributed processing", "data mining"],
+    ["parallel processing", "distributed processing"],
+    "Big data, data mining":
+    ["big data", "data mining", "data warehouse", "data warehouses",
+     "predictive analytics", "predictive analysis"],
     "Code of conduct and legislation and ethics":
     ["code of conduct", "legislation", "ethics", "ethical",
      "data protection act", "data protection",
