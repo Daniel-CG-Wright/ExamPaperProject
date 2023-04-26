@@ -1,13 +1,17 @@
-# ExamPaperProject
+# ExamPaperProject - Staff View
 This collated all the exam questions into a database.
-It also provides a UI with some options to help with revision, such as random question generation, exam paper generation
-and a question bank containing all the questions, and allowing them to be filtered.
+The UI provided with this version is for teaching use.
+It provides the question bank view available to students, as well as the ability
+to add new exam papers to the database. It also gives the ability to add questions
+manually, or edit or delete them.
+It does not have the capability to generate a random question or exam paper. This is
+only available in the student (ExamPaperProject) version.
 This version = 1.2
 
 ## Important
 This program runs a subprocess call to run pip if the required dependencies are not found on the Python environment.
 They are found in RunFrontend.py
-If you wish, you may delete these if you are scared of them. However, the program will still not run without the dependencies.
+If you wish, you may delete these subprocess calls if you are scared of them. However, the program will still not run without the dependencies.
 
 ## Acknowledgements:
 - Thank you very much to Muhie for having the idea of converting markschemes from PDFs to Word docs, this allowed for markscheme processing.
@@ -26,8 +30,6 @@ It also helped me come up with the idea for this program.
 ## Dependencies (already installed on school PCs):
 - PyQT5
 - python-docx
-
-To run the pdf parsing (not for end user use):
 - PyPDF2
 
 Made with Python 3.10, but should be backward compatible for a few versions.

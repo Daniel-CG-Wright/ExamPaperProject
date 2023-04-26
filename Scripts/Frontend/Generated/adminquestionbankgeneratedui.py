@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'questionbankmainwindow.ui'
+# Form implementation generated from reading ui file 'adminquestionbank.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ViewAllQuestions(object):
     def setupUi(self, ViewAllQuestions):
         ViewAllQuestions.setObjectName("ViewAllQuestions")
-        ViewAllQuestions.resize(715, 537)
+        ViewAllQuestions.resize(715, 390)
         font = QtGui.QFont()
         font.setPointSize(11)
         ViewAllQuestions.setFont(font)
@@ -24,14 +24,35 @@ class Ui_ViewAllQuestions(object):
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.lAdminLabel = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(15)
+        self.lAdminLabel.setFont(font)
+        self.lAdminLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.lAdminLabel.setObjectName("lAdminLabel")
+        self.verticalLayout.addWidget(self.lAdminLabel)
         self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 678, 854))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 678, 888))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.pbAddPaper = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pbAddPaper.sizePolicy().hasHeightForWidth())
+        self.pbAddPaper.setSizePolicy(sizePolicy)
+        self.pbAddPaper.setObjectName("pbAddPaper")
+        self.horizontalLayout_4.addWidget(self.pbAddPaper)
+        self.pbOpenSQLite = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.pbOpenSQLite.setObjectName("pbOpenSQLite")
+        self.horizontalLayout_4.addWidget(self.pbOpenSQLite)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_4)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.lineEdit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
@@ -161,6 +182,9 @@ class Ui_ViewAllQuestions(object):
     def retranslateUi(self, ViewAllQuestions):
         _translate = QtCore.QCoreApplication.translate
         ViewAllQuestions.setWindowTitle(_translate("ViewAllQuestions", "Question Bank"))
+        self.lAdminLabel.setText(_translate("ViewAllQuestions", "Admin Panel (can add papers)"))
+        self.pbAddPaper.setText(_translate("ViewAllQuestions", "Add Paper..."))
+        self.pbOpenSQLite.setText(_translate("ViewAllQuestions", "SQLite directory"))
         self.lineEdit.setPlaceholderText(_translate("ViewAllQuestions", "Search question contents..."))
         self.lMin.setText(_translate("ViewAllQuestions", "Min marks:"))
         self.lMax.setText(_translate("ViewAllQuestions", "Max marks:"))

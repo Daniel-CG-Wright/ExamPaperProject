@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QTableWidget
-from .Generated.QuestionBankGenerated import Ui_ViewAllQuestions
+from .Generated.adminquestionbankgeneratedui import Ui_ViewAllQuestions
 from PyQt5.QtCore import Qt
 from sqlitehandler import SQLiteHandler
 from .Util.CriteriaClass import CriteriaStruct, TOPICS
@@ -12,6 +12,9 @@ from .AlertWindowHandler import AlertWindow
 from .ConfirmWindowHandler import ConfirmWindow
 from .ImagesViewHandler import ImagesViewHandler
 from .Util.imageClass import AreImagesAvailable
+from .AddPaperHandler import AddPaper
+from pathlib import Path
+import os
 # handles the generation of random questions
 
 
@@ -46,6 +49,27 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         self.pbEditQuestion.clicked.connect(self.OpenEditQuestionMenu)
         self.pbDeleteQuestion.clicked.connect(self.OnDeleteQuestion)
         self.pbViewImages.clicked.connect(self.ShowImages)
+        self.pbAddPaper.clicked.connect(self.OnAddPaper)
+        self.pbOpenSQLite.clicked.connect(self.OpenSQLiteFile)
+
+    def OpenSQLiteFile(self):
+        """
+        Open the SQLite directory
+        """
+        # get the path to the sqlite file
+        sqlitePath = Path(self.SQLsocket.file)
+        # get the directory
+        sqliteDir = sqlitePath.parent
+        # open the directory
+        os.startfile(sqliteDir)
+
+    def OnAddPaper(self):
+        """
+        Open the add paper window
+        """
+        window = AddPaper(self)
+        # update table
+        self.PopulateTable()
 
     def ShowImages(self):
         """

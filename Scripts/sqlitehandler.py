@@ -8,9 +8,9 @@ class SQLiteHandler:
         """
         SQLite handler
         """
-
+        self.file = "Database/ExamQuestions.db"
         # connect, implicitly creating the database if it does not exist.
-        self.connection = sqlite3.connect("Database/ExamQuestions.db")
+        self.connection = sqlite3.connect(self.file)
         self.cursor = self.connection.cursor()
 
     def Reset(self):

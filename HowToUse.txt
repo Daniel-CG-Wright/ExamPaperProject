@@ -1,21 +1,15 @@
 Question bank:
+The buttons above allow you to open the directory containing the SQLite database,
+or to add a new paper.
 Top edit is the search bar. Search the contents of questions and their sub-parts
 You can select questions only from sepcific components or levels, or from a specific topic.
 You can filter by min and max marks for the entire question (all parts included).
+
+Adding papers:
+Follow the instructions on the window. Question papers must be as a PDF, markschemes
+must be as a docx (converted from the markscheme PDF).
 
 Adding questions:
 Fields should be self explanatory, the main question text is what shows before any parts are displayed.
 Images must be an image file, if marked as markscheme only they will only show up in the markscheme
 otherwise they will show up in the question (for diagrams etc).
-
-Random question generator:
-Add topics to the table. Any of the topics in the table can be generated.
-No topics selected = all topics allowed.
-Filter by min and max total marks, component and level as usual.
-
-Exam paper generator:
-Select the min and max marks for the paper. The program
-will try to generate a paper with marks around the middle of this.
-Select the component and level.
-You can save to a word document, or a txt file, if desired.
-
