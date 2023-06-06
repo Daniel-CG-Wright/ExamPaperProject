@@ -432,7 +432,7 @@ WHERE QuestionID = {self.editQuestionID}
             {self.sbMarks.value()},
             '{self.textEdit.toPlainText()}',
             '{self.teMS.toPlainText()}',
-            {paperid})
+            '{paperid}')
             """
             self.SQLSocket.addToDatabase(sqlquery)
             # add parts
