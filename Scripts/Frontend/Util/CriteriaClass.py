@@ -7,7 +7,8 @@ from typing import Dict
 TOPICKEYWORDS: Dict[str, str] = {
     "Databases": ["database", "Entity-Relationship Diagram", "ERD"],
     "Software types":
-    ["bespoke", "off-the-shelf", "open source", "proprietary"],
+    ["bespoke", "off-the-shelf", "open source", "proprietary",
+     "open-source"],
     "Contingencies":
     ["contingency", "recovery", "backup", "backing up"],
     "Operating Systems - buffering, interrupts, polling":
@@ -89,7 +90,7 @@ TOPICKEYWORDS: Dict[str, str] = {
     ["Compiler", "interpreter", "assembler", "translation", "compilation",
      "compilers", "interpreters", "assemblers"],
     "Software for development":
-    ["version control", "IDE", "debugging"],
+    ["version control", "IDE", "debugging", "version management"],
     "Analysis and design":
     ["waterfall", "agile", "analysis", "feasibility", "investigate",
      "investigation", "changeover", "design review", "evaluation"],

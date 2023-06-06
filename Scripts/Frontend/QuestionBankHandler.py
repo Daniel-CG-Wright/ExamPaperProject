@@ -155,7 +155,7 @@ class QuestionBankHandler(Ui_ViewAllQuestions, QMainWindow):
         """
         selectedrowindex = self.twQuestionBank.currentRow()
         # if -1 then do not go, as this can happen sometimes
-        if selectedrowindex == -1:
+        if selectedrowindex == -1 or selectedrowindex >= len(self.records):
             return
         questionid: str = self.records[selectedrowindex][0]
         self.UpdatePartsTable(questionid)
