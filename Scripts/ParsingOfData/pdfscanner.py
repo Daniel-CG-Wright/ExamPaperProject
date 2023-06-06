@@ -1,4 +1,5 @@
 # used to scan pdf files into a list of images for each question
+# NOTE remove __main__ code when finished
 # using pydf2
 import PyPDF2
 # and fitz
@@ -47,23 +48,28 @@ def ExtractQuestionSnapshots(pdfPath: str) -> Dict[str, List[str]]:
                 # start char is the question number followed by a full stop
                 # this is the regex pattern to find the start of the question
                 startCharPattern = re.compile(
-                    r"\s{0}\.\s".format(questionNumber), re.DOTALL)
+                    r"{0}\.\s".format(questionNumber), re.DOTALL)
                 startChar = f"{questionNumber}. "
                 # end char is the next question number followed by a full stop
                 # this is the regex pattern to find the end of the question
                 endCharPattern = re.compile(
-                    r"\s{0}\.\s".format(questionNumber + 1), re.DOTALL)
+                    r"{0}\.\s".format(questionNumber + 1), re.DOTALL)
                 # instead of using a pattern we can just look for the
                 # next question number
                 # pattern = r"{0}\..*?(?={1}\.)".format(
                 #         questionNumber, questionNumber + 1)
+
+                # if the end of exam page is reached
+                isEndOfExam = False
                 for index in range(lastPage, len(reader.pages), 1):
                     page = reader.pages[index]
                     text = page.extract_text()
+                    if "end of paper" in text.lower():
+                        isEndOfExam = True
 
                     # search for the start of the question
                     searchresult = re.search(startCharPattern, text)
-                    if searchresult:
+                    if searchresult and not startPage:
                         startPage = index
 
                     # get the text with the square bracket before
@@ -75,7 +81,7 @@ def ExtractQuestionSnapshots(pdfPath: str) -> Dict[str, List[str]]:
                     searchresult = re.search(
                         endCharPattern, text)
 
-                    if searchresult:
+                    if (searchresult or isEndOfExam) and not endPage:
                         endPage = index
 
                     if startPage and endPage:
@@ -115,6 +121,8 @@ def ExtractQuestionSnapshots(pdfPath: str) -> Dict[str, List[str]]:
                             endCharPattern, text)
                         if searchResult:
                             endPos: int = searchResult.end()
+                        elif isEndOfExam:
+                            endPos = len(text)
                         # count number of square brackets
                         # this is used to find the end of the question
                         # and therefore the end of the snapshot
